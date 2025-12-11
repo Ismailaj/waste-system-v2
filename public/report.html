@@ -75,7 +75,7 @@
       </div>
     </header>
 
-    <form class="m-8 w-3/7 mx-auto"> 
+    <form class="m-8 w-3/7 mx-auto">
       <h1 class="text-3xl font-bold text-gray-800 m mb-6 sm:mb-8">
         Report a Waste Incident
       </h1>
@@ -95,9 +95,9 @@
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="" disabled selected>Choose a category</option>
-                <option value="littering">Littering</option>
-                <option value="illegal_dumping">Illegal dumping</option>
-                <option value="hazardous_waste">Hazardous waste</option>
+                <option id="optionOne" value="reclyable">Reclyable</option>
+                <option id="optionTwo" value="illegal_dumping">Illegal dumping</option>
+                <option id="optionThree" value="hazardous_waste">Hazardous waste</option>
               </select>
             </div>
             <div>
@@ -157,20 +157,23 @@
           </div>
         </div>
       </div>
-    <div class="flex gap-4 mt-6">
+      <div class="flex gap-4 mt-6">
         <button
-            type="submit"
-            class="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition"
+          type="submit"
+          class="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition"
         >
-            Submit Report
+          Submit Report
         </button>
         <button
-            type="button"
-            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition"
+          type="button"
+          class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition"
         >
-            Cancel
+          Cancel
         </button>
-    </div>
+      </div>
     </form>
+
+
+    <script src="report.js"></script>
   </body>
 </html>
