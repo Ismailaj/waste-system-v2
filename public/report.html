@@ -36,7 +36,7 @@
         <!-- Dashboard & User -->
         <div class="flex items-center space-x-4 text-gray-600">
           <a
-            href="#"
+            href="./dashboard-user.html"
             class="text-sm font-medium hover:text-green-600 hidden sm:inline"
             >Dashboard</a
           >
@@ -75,12 +75,19 @@
       </div>
     </header>
 
-    <form class="m-8 w-3/7 mx-auto">
+    <form
+      method="POST"
+      class="m-8 max-w-4xl mx-auto"
+      enctype="multipart/form-data"
+    >
       <h1 class="text-3xl font-bold text-gray-800 m mb-6 sm:mb-8">
         Report a Waste Incident
       </h1>
-      <div class="flex flex-col">
-        <div class="rounded-xl bg-white p-6 custom-shadow">
+
+      <!-- Responsive two-column layout: stacks on small screens, side-by-side on md+ -->
+      <div class="flex flex-col md:flex-row md:items-start md:space-x-8 gap-6">
+        <!-- Left / Main column -->
+        <div class="rounded-xl bg-white p-6 custom-shadow md:flex-1">
           <h2 class="text-lg font-semibold text-gray-800 mb-4">
             Report Details
           </h2>
@@ -92,12 +99,13 @@
                 >Waste Category</label
               >
               <select
+                id="select"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="" disabled selected>Choose a category</option>
-                <option id="optionOne" value="reclyable">Reclyable</option>
-                <option id="optionTwo" value="illegal_dumping">Illegal dumping</option>
-                <option id="optionThree" value="hazardous_waste">Hazardous waste</option>
+                <option value="recyclable">Recyclable</option>
+                <option value="illegal_dumping">Illegal dumping</option>
+                <option value="hazardous_waste">Hazardous waste</option>
               </select>
             </div>
             <div>
@@ -107,7 +115,9 @@
                 >Address or location</label
               >
               <input
+                id="address"
                 type="text"
+                required
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent hover:ring-gray-500 hover:ring-2"
                 placeholder="Enter address or location"
               />
@@ -116,16 +126,21 @@
               <label
                 for="description"
                 class="block text-sm font-medium text-gray-700 mb-2"
-                >Description</label
+                >Description <span class="text-gray-400">Optional</span></label
               >
               <textarea
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent hover:ring-gray-500 hover:ring-2"
+                id="description"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent hover:ring-gray-500 hover:ring-2 min-h-[120px]"
                 placeholder="Provide more details about the incident, such as size of the pile, specific items or any potential hazards"
               ></textarea>
             </div>
           </div>
         </div>
-        <div class="rounded-xl bg-white p-6 custom-shadow mt-5">
+
+        <!-- Right / Sidebar column (upload) -->
+        <aside
+          class="rounded-xl bg-white p-6 custom-shadow md:w-80 flex-shrink-0"
+        >
           <h2 class="text-lg font-semibold text-gray-800 mb-4">
             Upload Photos
           </h2>
@@ -133,10 +148,19 @@
             Drag and drop files here or click to upload.
           </p>
           <div
-            class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-200"
+            class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-200 h-56 flex flex-col items-center justify-center"
           >
-            <input type="file" id="file-upload" class="hidden" multiple />
-            <label for="file-upload" class="cursor-pointer">
+            <input
+              type="file"
+              id="file-upload"
+              name="photos"
+              class="hidden"
+              multiple
+            />
+            <label
+              for="file-upload"
+              class="cursor-pointer flex flex-col items-center"
+            >
               <svg
                 class="w-12 h-12 mx-auto mb-2 text-gray-400"
                 fill="none"
@@ -155,7 +179,7 @@
               </div>
             </label>
           </div>
-        </div>
+        </aside>
       </div>
       <div class="flex gap-4 mt-6">
         <button
@@ -164,16 +188,10 @@
         >
           Submit Report
         </button>
-        <button
-          type="button"
-          class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition"
-        >
-          Cancel
-        </button>
       </div>
     </form>
 
-
-    <script src="report.js"></script>
+    <script src="report.js">
+    </script>
   </body>
 </html>

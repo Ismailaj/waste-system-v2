@@ -2,6 +2,11 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Report from "../models/report.js";
+import authenticate from "../middleware/auth.js"
+import upload from "../config/multer.js";
+import cloudinary from "../config/cloudinary.js";
+import fs from "fs";
 
 const router = express.Router();
 
@@ -14,7 +19,7 @@ router.post("/signup", async (req, res) => {
     }
 
     //check if the user exists
-    const userExists = await User.findOne({ email }); //pauses here until the promise finishes
+    const userExists = await User.findOne({ email });
     if (userExists) {
       return res
         .status(409)
@@ -110,8 +115,97 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/report", async (req, res) => {
-  const { typeOfWaste, description, location } = req.body; 
+router.post("/report", authenticate, upload.array("photos", 5), async (req, res) => {
+  try {
+    console.log("Report route hit. Content-Type:", req.headers["content-type"]);
+    console.log("Request body:", req.body);
+    const { category, address, description } = req.body;
+
+    if (!category || !address) {
+      return res.status(400).json({
+        success: false,
+        message: "Category and address are required",
+      });
+    }
+
+    const validWasteTypes = [
+      "recyclable",
+      "illegal_dumping",
+      "hazardous_waste",
+    ];
+    if (!validWasteTypes.includes(category)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid waste type",
+      });
+    }
+
+    // an array to store the photos
+    const photoUrls = [];
+    if (req.files && req.files.length > 0) {
+      console.log("Files received:", req.files);
+
+      for (const file of req.files) {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "waste_reports",
+        });
+        console.log("Uploading:", file.path);
+
+        photoUrls.push(result.secure_url);
+
+        // delete local file after upload
+        fs.unlinkSync(file.path);
+      }
+    }
+
+    const newReport = await Report.create({
+      category,
+      address,
+      description,
+      photos: photoUrls, // save array of image URLs
+      status: "Pending",
+      user: req.user.id
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Report submitted successfully",
+      report: newReport,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 });
 
+
+
+router.get("/dashboard", authenticate, async (req, res) => {
+  try {
+    // 1. Gets the logged-in user's ID from the token (via middleware).
+    const userId = req.user.id;
+
+    // 2. Finds all reports in MongoDB where the 'user' field matches this ID.
+    // .sort({ createdAt: -1 }) puts the newest reports at the top of the list.
+    const reports = await Report.find({ user: userId }).sort({ createdAt: -1 });
+
+    // 3. Calculates 'Total Reports' by getting the length of the reports array.
+    const totalReports = reports.length;
+
+    // 4. Uses .filter() to count how many reports have the status "Resolved".
+    const resolvedIncidents = reports.filter(r => r.status === "Resolved").length;
+
+    // 5. Counts reports that are still "Pending" or "In Progress".
+    const inProgress = reports.filter(r => r.status === "Pending" || r.status === "In Progress").length;
+
+    // 6. Sends all the stats and the full list of reports back to the frontend.
+    res.status(200).json({
+      success: true,
+      stats: { totalReports, resolvedIncidents, inProgress },
+      reports 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching dashboard" });
+  }
+});
 export default router;

@@ -9,7 +9,6 @@ form.addEventListener("submit", async (e) => {
   messageElement.textContent = "";
 
   try {
-
     const response = await fetch("http://localhost:5050/api/users/signup", {
       method: "POST",
       headers: {
@@ -18,24 +17,20 @@ form.addEventListener("submit", async (e) => {
       body: JSON.stringify({
         fullname,
         email,
-        password
+        password,
       }),
-
     });
 
     const data = await response.json();
 
     if (response.ok && data.successs) {
-        messageElement.textContent = "Registraton Successful";
-        console.log(`${data.fullname} registered successfully`);
-        
+      messageElement.textContent = "Registraton Successful";
+      console.log(`${data.fullname} registered successfully`);
     } else {
-        messageElement.textContent = data.message;
+      messageElement.textContent = data.message;
     }
-
-
   } catch (error) {
-      messageElement.textContent = "Couldn't establish connection";
-      console.log("Error encountered : ", error.message);
+    messageElement.textContent = "Couldn't establish connection";
+    console.log("Error encountered : ", error.message);
   }
 });

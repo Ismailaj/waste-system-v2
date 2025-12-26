@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Collector-Admin Dashboard - WasteWise</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#13ec37",
+              "background-light": "#f6f8f6",
+              "background-dark": "#102213",
+            },
+            fontFamily: {
+              display: ["Public Sans", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark text-[#111812] dark:text-gray-100 font-display overflow-hidden"
+  >
+    <div class="flex h-screen w-full">
+      <!-- Sidebar -->
+      <aside
+        class="w-64 flex-shrink-0 flex flex-col bg-white dark:bg-[#1a2e1d] border-r border-[#dbe6dd] dark:border-[#2a402d] h-full transition-all duration-300"
+      >
+        <!-- Logo Section -->
+        <div class="p-6 flex items-center gap-3">
+          <div
+            class="bg-center bg-no-repeat bg-cover rounded-full size-10"
+            data-alt="WasteWise Green Leaf Logo"
+            style="
+              background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBezEpioL4Ob6c7PzRKCBa5mf0iKPcumaedIDNCNZW-6tSnhlA4Sq-KzxfVM1dZ9qr6ftzRiqVZQpbQmQkysQsDhEZ_kBCvicuKC35lVbIiF2hc6-trN4p2InagtzyGEyWX7GSYb7MSs4W9lVosIh9ZPjJG7vX_k-LoGPf7CNgkxPaERMr504L3biwkvq8--Z5kTbiNyzvMc3OwmuAN24KoxxnM6IQsP9FjE_L97UhvHyCiPVAY0rNTjNRMPZqTM1BDCVzDOFLJxr0');
+            "
+          ></div>
+          <div class="flex flex-col">
+            <h1
+              class="text-[#111812] dark:text-white text-lg font-bold leading-normal"
+            >
+              WasteWise
+            </h1>
+            <p
+              class="text-[#618968] dark:text-[#8ab392] text-xs font-medium uppercase tracking-wider"
+            >
+              Collector-Admin
+            </p>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div class="flex-1 overflow-y-auto px-4 py-2 flex flex-col gap-6">
+          <!-- Field Operations Group -->
+          <div class="flex flex-col gap-1">
+            <p
+              class="px-3 text-xs font-semibold text-[#618968] dark:text-[#8ab392] uppercase tracking-wider mb-2"
+            >
+              Field Operations
+            </p>
+            <a
+              class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#f0f4f1] dark:bg-[#233b26] text-[#111812] dark:text-white group"
+              href="#"
+            >
+              <span
+                class="material-symbols-outlined text-[#111812] dark:text-primary"
+                >dashboard</span
+              >
+              <p class="text-sm font-medium leading-normal">Dashboard</p>
+            </a>
+            <a
+              class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#111812] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#233b26] transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">map</span>
+              <p class="text-sm font-medium leading-normal">My Route</p>
+            </a>
+            <a
+             class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#111812] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#233b26] transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">local_shipping</span>
+              <p class="text-sm font-medium leading-normal">Collection Tasks</p>
+            </a>
+          </div>
+          <!-- Administrative Group -->
+          <div class="flex flex-col gap-1">
+            <p
+              class="px-3 text-xs font-semibold text-[#618968] dark:text-[#8ab392] uppercase tracking-wider mb-2"
+            >
+              Administration
+            </p>
+            <a
+              id="incidents"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#111812] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#233b26] transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">warning</span>
+              <p class="text-sm font-medium leading-normal">
+                Reported Incidents
+              </p>
+            </a>
+            <a
+              class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#111812] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#233b26] transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">group</span>
+              <p class="text-sm font-medium leading-normal">User Management</p>
+            </a>
+            <a
+              class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#111812] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#233b26] transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">bar_chart</span>
+              <p class="text-sm font-medium leading-normal">System Analytics</p>
+            </a>
+          </div>
+          <!-- Settings -->
+          <div class="mt-auto flex flex-col gap-1 pb-4">
+            <a
+              class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#111812] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#233b26] transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">settings</span>
+              <p class="text-sm font-medium leading-normal">Settings</p>
+            </a>
+          </div>
+        </div>
+        <!-- Quick Action -->
+        <div class="p-4 border-t border-[#dbe6dd] dark:border-[#2a402d]">
+          <button
+            class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#111812] hover:bg-primary/90 transition-colors text-sm font-bold leading-normal tracking-[0.015em] shadow-sm"
+          >
+            <span class="material-symbols-outlined text-[20px] mr-2"
+              >add_circle</span
+            >
+            <span class="truncate">Log New Incident</span>
+          </button>
+        </div>
+      </aside>
+      <!-- Main Content -->
+      <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        <!-- Top Header -->
+        <header
+          class="h-16 flex items-center justify-between px-8 bg-white dark:bg-[#1a2e1d] border-b border-[#dbe6dd] dark:border-[#2a402d] shrink-0 z-10"
+        >
+          <div class="flex items-center gap-4">
+            <h2
+              class="text-[#111812] dark:text-white text-xl font-bold leading-tight"
+            >
+              Overview
+            </h2>
+            <div class="h-6 w-px bg-gray-200 dark:bg-gray-700"></div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Field &amp; Admin Mode Active
+            </p>
+          </div>
+          <div class="flex items-center gap-4">
+            <button
+              class="size-10 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-[#233b26] text-gray-600 dark:text-gray-300 relative"
+            >
+              <span class="material-symbols-outlined">notifications</span>
+              <span
+                class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border border-white dark:border-[#1a2e1d]"
+              ></span>
+            </button>
+            <div
+              class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700"
+            >
+              <div class="text-right hidden sm:block">
+                <p
+                  class="text-sm font-bold text-[#111812] dark:text-white leading-none"
+                >
+                  Alex Morgan
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  ID: #COL-8842
+                </p>
+              </div>
+              <div
+                class="size-9 bg-gray-200 rounded-full bg-cover bg-center border-2 border-white dark:border-[#2a402d] shadow-sm"
+                data-alt="Profile picture of a smiling man in uniform"
+                style="
+                  background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBWjj2P6-hfkJZ48HtTP6oAzC1tHfzgDUFHhj9xxWWFxtmkJTs0vFH-5vuRK1yl5cHF6ISFWHP7xPYbtymTaRMnFA45NRmdFHY0HVHtCXJ-6zw6tlITcGyKBEdzWuu9FnKDefkiTHFXl6BTN4w-C3F_kQoK-7T9HwgeTqdp4qHSgRP2hw4w_BmVYaHPohnZLrEVZJr7NFBY6ybmsWMU9vZZCq_YJ6PwC6DUjK1BhzShn-P0vsOQzh4Lgxdd0sLARNJ67W_CLfJbcCs');
+                "
+              ></div>
+            </div>
+          </div>
+        </header>
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
+          <div class="max-w-[1200px] mx-auto flex flex-col gap-8 pb-10">
+            <!-- Welcome & Heading -->
+            <div class="flex flex-wrap justify-between items-end gap-4">
+              <div class="flex min-w-72 flex-col gap-2">
+                <p
+                  class="text-[#111812] dark:text-white text-3xl font-black leading-tight tracking-[-0.033em]"
+                >
+                  Good Morning, Alex
+                </p>
+                <p
+                  class="text-[#618968] dark:text-[#8ab392] text-base font-normal leading-normal"
+                >
+                  Manage your collections and oversee system activity.
+                </p>
+              </div>
+              <div
+                class="flex items-center gap-2 bg-white dark:bg-[#1a2e1d] rounded-lg p-1 border border-[#dbe6dd] dark:border-[#2a402d] shadow-sm"
+              >
+                <button
+                  class="px-4 py-1.5 rounded bg-primary/20 text-[#0d9e24] dark:text-[#13ec37] text-sm font-bold shadow-sm"
+                >
+                  Field View
+                </button>
+                <button
+                  class="px-4 py-1.5 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#233b26] text-sm font-medium transition-colors"
+                >
+                  Admin View
+                </button>
+              </div>
+            </div>
+            <!-- Stats Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <!-- Stat 1 -->
+              <div
+                class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-[#1a2e1d] border border-[#dbe6dd] dark:border-[#2a402d] shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div class="flex items-center justify-between">
+                  <p
+                    class="text-[#111812] dark:text-gray-300 text-sm font-medium leading-normal"
+                  >
+                    Pending Collections
+                  </p>
+                  <span class="material-symbols-outlined text-orange-500"
+                    >pending_actions</span
+                  >
+                </div>
+                <div class="flex items-end gap-2">
+                  <p
+                    class="text-[#111812] dark:text-white tracking-tight text-3xl font-bold leading-none"
+                  >
+                    12
+                  </p>
+                  <p class="text-[#e72608] text-sm font-medium mb-1">
+                    -2% vs yst
+                  </p>
+                </div>
+              </div>
+              <!-- Stat 2 -->
+              <div
+                class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-[#1a2e1d] border border-[#dbe6dd] dark:border-[#2a402d] shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div class="flex items-center justify-between">
+                  <p
+                    class="text-[#111812] dark:text-gray-300 text-sm font-medium leading-normal"
+                  >
+                    Active Trucks
+                  </p>
+                  <span class="material-symbols-outlined text-primary"
+                    >local_shipping</span
+                  >
+                </div>
+                <div class="flex items-end gap-2">
+                  <p
+                    class="text-[#111812] dark:text-white tracking-tight text-3xl font-bold leading-none"
+                  >
+                    5
+                  </p>
+                  <p
+                    class="text-[#078825] dark:text-primary text-sm font-medium mb-1"
+                  >
+                    +1 online
+                  </p>
+                </div>
+              </div>
+              <!-- Stat 3 -->
+              <div
+                class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-[#1a2e1d] border border-[#dbe6dd] dark:border-[#2a402d] shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div class="flex items-center justify-between">
+                  <p
+                    class="text-[#111812] dark:text-gray-300 text-sm font-medium leading-normal"
+                  >
+                    Urgent Reports
+                  </p>
+                  <span class="material-symbols-outlined text-red-500"
+                    >priority_high</span
+                  >
+                </div>
+                <div class="flex items-end gap-2">
+                  <p
+                    class="text-[#111812] dark:text-white tracking-tight text-3xl font-bold leading-none"
+                  >
+                    3
+                  </p>
+                  <p class="text-red-600 text-sm font-medium mb-1">+3 new</p>
+                </div>
+              </div>
+              <!-- Stat 4 -->
+              <div
+                class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-[#1a2e1d] border border-[#dbe6dd] dark:border-[#2a402d] shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div class="flex items-center justify-between">
+                  <p
+                    class="text-[#111812] dark:text-gray-300 text-sm font-medium leading-normal"
+                  >
+                    Completion Rate
+                  </p>
+                  <span class="material-symbols-outlined text-blue-500"
+                    >check_circle</span
+                  >
+                </div>
+                <div class="flex items-end gap-2">
+                  <p
+                    class="text-[#111812] dark:text-white tracking-tight text-3xl font-bold leading-none"
+                  >
+                    85%
+                  </p>
+                  <p
+                    class="text-[#078825] dark:text-primary text-sm font-medium mb-1"
+                  >
+                    +12% target
+                  </p>
+                </div>
+              </div>
+            </div>
+            <!-- Operational Section -->
+            <div class="flex flex-col gap-4">
+              <div
+                class="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800"
+              >
+                <h2
+                  class="text-[#111812] dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] flex items-center gap-2"
+                >
+                  <span class="material-symbols-outlined text-primary"
+                    >navigation</span
+                  >
+                  My Active Route
+                </h2>
+                <button
+                  class="text-sm font-medium text-primary hover:text-primary/80"
+                >
+                  View Full Map
+                </button>
+              </div>
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Map Card -->
+                <div
+                  class="lg:col-span-2 rounded-xl overflow-hidden border border-[#dbe6dd] dark:border-[#2a402d] shadow-sm bg-white dark:bg-[#1a2e1d] relative group"
+                >
+                  <div
+                    class="w-full h-[350px] bg-center bg-no-repeat bg-cover object-cover relative"
+                    data-location="San Francisco City Center Map"
+                    style="
+                      background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBkHb6qJNQxj7NdU-rB6Qe2aqiwa7Av2_fDgUw3ZDZcyMrbRVXkrDxIVxkHZL4ymD_wyaaL-KPqCqkko_UO1E0lFX1nXcUqZCRmyq-rMc5xA0N3S1mRTxXjT3SOkI41hHRIsMiRTszbTpGdzKWb0wUNLxTGnS2wB7gHOhJjyA_2XByHAYDSSaInE9mvaGhiUhBIx9VRo5Khk9MaxNbmM5wNavr5v8CDMMN5FA1Xhydr21acQA9G7kbIWvhms0bWZMwusvtEAXNjH6g');
+                    "
+                  >
+                    <!-- Map Overlay for Route -->
+                    <div
+                      class="absolute inset-0 bg-black/10 dark:bg-black/40"
+                    ></div>
+                    <div
+                      class="absolute top-4 left-4 bg-white/90 dark:bg-[#1a2e1d]/90 backdrop-blur px-3 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+                    >
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="size-2 rounded-full bg-primary animate-pulse"
+                        ></div>
+                        <span
+                          class="text-xs font-bold text-[#111812] dark:text-white"
+                          >Live Tracking Active</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Next Pickup Task Card -->
+                <div
+                  class="rounded-xl border border-[#dbe6dd] dark:border-[#2a402d] bg-white dark:bg-[#1a2e1d] shadow-sm p-6 flex flex-col justify-between"
+                >
+                  <div>
+                    <div class="flex justify-between items-start mb-4">
+                      <div
+                        class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide"
+                      >
+                        Next Stop
+                      </div>
+                      <span
+                        class="text-gray-400 dark:text-gray-500 text-xs font-medium"
+                        >Est. 12 mins</span
+                      >
+                    </div>
+                    <h3
+                      class="text-2xl font-bold text-[#111812] dark:text-white mb-2"
+                    >
+                      452 Evergreen Terrace
+                    </h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">
+                      Commercial Waste • 4 Bins • Keypad: 4492
+                    </p>
+                    <div class="flex flex-col gap-3">
+                      <div
+                        class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#233b26] rounded-lg"
+                      >
+                        <span
+                          class="material-symbols-outlined text-gray-500 dark:text-gray-400"
+                          >directions</span
+                        >
+                        <span
+                          class="text-sm font-medium text-[#111812] dark:text-gray-200"
+                          >5.2 km away</span
+                        >
+                      </div>
+                      <div
+                        class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#233b26] rounded-lg"
+                      >
+                        <span
+                          class="material-symbols-outlined text-gray-500 dark:text-gray-400"
+                          >phone</span
+                        >
+                        <span
+                          class="text-sm font-medium text-[#111812] dark:text-gray-200"
+                          >+1 (555) 012-3456 (Site Manager)</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    class="w-full mt-6 bg-primary hover:bg-primary/90 text-[#111812] font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Mark as Collected
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Admin Section -->
+            <div class="flex flex-col gap-4 pt-4">
+              <div
+                class="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800"
+              >
+                <h2
+                  class="text-[#111812] dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] flex items-center gap-2"
+                >
+                  <span
+                    class="material-symbols-outlined text-gray-400 dark:text-gray-500"
+                    >admin_panel_settings</span
+                  >
+                  Administrative Oversight
+                </h2>
+                <div class="flex gap-2">
+                  <button
+                    class="p-2 text-gray-500 hover:text-[#111812] dark:hover:text-white transition-colors"
+                  >
+                    <span class="material-symbols-outlined">filter_list</span>
+                  </button>
+                  <button
+                    class="p-2 text-gray-500 hover:text-[#111812] dark:hover:text-white transition-colors"
+                  >
+                    <span class="material-symbols-outlined">download</span>
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Incident Table -->
+                <div
+                  class="flex-1 rounded-xl border border-[#dbe6dd] dark:border-[#2a402d] bg-white dark:bg-[#1a2e1d] shadow-sm overflow-hidden"
+                >
+                  <div
+                    class="px-6 py-4 border-b border-[#dbe6dd] dark:border-[#2a402d] flex justify-between items-center bg-gray-50/50 dark:bg-[#233b26]/30"
+                  >
+                    <h3
+                      class="font-bold text-[#111812] dark:text-white text-sm"
+                    >
+                      Recent Reported Incidents
+                    </h3>
+                    <a
+                      class="text-primary text-xs font-bold uppercase hover:underline"
+                      href="#"
+                      >View All</a
+                    >
+                  </div>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                      <thead
+                        class="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50 dark:bg-[#233b26]/50"
+                      >
+                        <tr>
+                          <th class="px-6 py-3 font-medium">Type</th>
+                          <th class="px-6 py-3 font-medium">Location</th>
+                          <th class="px-6 py-3 font-medium">Reporter</th>
+                          <th class="px-6 py-3 font-medium">Status</th>
+                          <th class="px-6 py-3 font-medium text-right">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        class="divide-y divide-[#dbe6dd] dark:divide-[#2a402d]"
+                      >
+                        <tr
+                          class="hover:bg-gray-50 dark:hover:bg-[#233b26]/30 transition-colors"
+                        >
+                          <td
+                            class="px-6 py-4 font-medium text-[#111812] dark:text-white flex items-center gap-2"
+                          >
+                            <span
+                              class="material-symbols-outlined text-red-500 text-lg"
+                              >block</span
+                            >
+                            Missed Pickup
+                          </td>
+                          <td
+                            class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                          >
+                            128 Market St.
+                          </td>
+                          <td
+                            class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                          >
+                            J. Doe
+                          </td>
+                          <td class="px-6 py-4">
+                            <span
+                              class="px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                              >High Priority</span
+                            >
+                          </td>
+                          <td class="px-6 py-4 text-right">
+                            <button
+                              class="text-gray-400 hover:text-primary transition-colors"
+                            >
+                              <span class="material-symbols-outlined"
+                                >more_vert</span
+                              >
+                            </button>
+                          </td>
+                        </tr>
+                        <tr
+                          class="hover:bg-gray-50 dark:hover:bg-[#233b26]/30 transition-colors"
+                        >
+                          <td
+                            class="px-6 py-4 font-medium text-[#111812] dark:text-white flex items-center gap-2"
+                          >
+                            <span
+                              class="material-symbols-outlined text-orange-500 text-lg"
+                              >delete_forever</span
+                            >
+                            Overflowing Bin
+                          </td>
+                          <td
+                            class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                          >
+                            Central Park North
+                          </td>
+                          <td
+                            class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                          >
+                            A. Smith
+                          </td>
+                          <td class="px-6 py-4">
+                            <span
+                              class="px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                              >Pending</span
+                            >
+                          </td>
+                          <td class="px-6 py-4 text-right">
+                            <button
+                              class="text-gray-400 hover:text-primary transition-colors"
+                            >
+                              <span class="material-symbols-outlined"
+                                >more_vert</span
+                              >
+                            </button>
+                          </td>
+                        </tr>
+                        <tr
+                          class="hover:bg-gray-50 dark:hover:bg-[#233b26]/30 transition-colors"
+                        >
+                          <td
+                            class="px-6 py-4 font-medium text-[#111812] dark:text-white flex items-center gap-2"
+                          >
+                            <span
+                              class="material-symbols-outlined text-blue-500 text-lg"
+                              >recycling</span
+                            >
+                            Contamination
+                          </td>
+                          <td
+                            class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                          >
+                            45 Elm Avenue
+                          </td>
+                          <td
+                            class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                          >
+                            Driver Report
+                          </td>
+                          <td class="px-6 py-4">
+                            <span
+                              class="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                              >Assigned</span
+                            >
+                          </td>
+                          <td class="px-6 py-4 text-right">
+                            <button
+                              class="text-gray-400 hover:text-primary transition-colors"
+                            >
+                              <span class="material-symbols-outlined"
+                                >more_vert</span
+                              >
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <!-- Analytics Widget -->
+                <div class="lg:w-1/3 flex flex-col gap-6">
+                  <!-- User Management Summary -->
+                  <div
+                    class="rounded-xl border border-[#dbe6dd] dark:border-[#2a402d] bg-white dark:bg-[#1a2e1d] shadow-sm p-6"
+                  >
+                    <div class="flex justify-between items-center mb-4">
+                      <h3
+                        class="font-bold text-[#111812] dark:text-white text-sm"
+                      >
+                        New Registrations
+                      </h3>
+                      <span
+                        class="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded"
+                        >+12 this week</span
+                      >
+                    </div>
+                    <div class="flex flex-col gap-3">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="size-8 rounded-full bg-gray-200 bg-cover bg-center"
+                            data-alt="Avatar of user Sarah L"
+                            style="
+                              background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAUucTjGet4WKw_ewHVMWxYtq6U1x67YCh5qOoPF_-JanAGOpp9IJPS8kqaJRMPMYHGsrG9kbRfhAdVYlK0A_lIZI2i3JTvqAiAiqqqo33r5lt3cIyDTrnYooDFq0O4aVKoLrMflEpjhY66l47x1h4sEBORoNH7awcMQiUImQZ8LgWHd9ZrlENuFolLYQJX6vYT7xo5fn6Pa6nIoqmPD1WuWNaRPaNeByhv4-mmKpBPus95RRAjy_Ssgv7h1thss259Dj1bDG0gsXI');
+                            "
+                          ></div>
+                          <div class="flex flex-col">
+                            <p
+                              class="text-sm font-bold text-[#111812] dark:text-white"
+                            >
+                              Sarah L.
+                            </p>
+                            <p class="text-xs text-gray-500">Citizen</p>
+                          </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-green-600">
+                          <span class="material-symbols-outlined">check</span>
+                        </button>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="size-8 rounded-full bg-gray-200 bg-cover bg-center"
+                            data-alt="Avatar of user Mike R"
+                            style="
+                              background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCbY0qv8RvrkhWZvE35mJMj4wd9gX9OwIjLVHJujy_QxcTbEvqrtBRcefTBCbw90RrkLmcN4gzpoxpPBgN8kDFblGy6rrGhmktTzYbxIO84WGS5pEcjyL790gTy6ufJlf9wLKejBUSM57XZ-IfaWDjpP68EVx-VmLu5wONUEFILRfWdqxfzBmNfBUJCXuKyZkbPCDG8vmmjJj2VjYGuiEx479XM-5NbUoTkLqHTgwUPib4N8VePlX7gUJSw8Ze68lvfEUXF-EzzKRU');
+                            "
+                          ></div>
+                          <div class="flex flex-col">
+                            <p
+                              class="text-sm font-bold text-[#111812] dark:text-white"
+                            >
+                              Mike R.
+                            </p>
+                            <p class="text-xs text-gray-500">Business Owner</p>
+                          </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-green-600">
+                          <span class="material-symbols-outlined">check</span>
+                        </button>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="size-8 rounded-full bg-gray-200 bg-cover bg-center"
+                            data-alt="Avatar of user Emily W"
+                            style="
+                              background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBvecarFpUgtfqRi15dh2tg-5bIXJaNZ3O5JpIMqx3kOUcdJnFxvoqMiyZUhk4nQa5gSOKET5O5j6gCDynNeTX2aVGzayoE8vKq9qKfHeO1XnYNbKqUmyy6fFh00fshp1GhbvFE1rYHPRM4A45AeSfIFS0p66296HnkeZ7y8-IBugOT6t0h2AkDNRbEdSRByrX_BbkHoLz2HMbjenGYgrMoBhA27EHnJN9HgfoeUp79bnttii6vH7IHndU8RtkX1H48w0e_KHGt6wQ');
+                            "
+                          ></div>
+                          <div class="flex flex-col">
+                            <p
+                              class="text-sm font-bold text-[#111812] dark:text-white"
+                            >
+                              Emily W.
+                            </p>
+                            <p class="text-xs text-gray-500">Citizen</p>
+                          </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-green-600">
+                          <span class="material-symbols-outlined">check</span>
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                      class="w-full mt-4 py-2 text-sm font-medium text-gray-500 hover:text-[#111812] dark:hover:text-white border border-dashed border-gray-300 dark:border-gray-700 rounded-lg hover:border-gray-400 transition-all"
+                    >
+                      View All Users
+                    </button>
+                  </div>
+                  <!-- Mini Chart Placeholder (CSS Only) -->
+                  <div
+                    class="rounded-xl border border-[#dbe6dd] dark:border-[#2a402d] bg-white dark:bg-[#1a2e1d] shadow-sm p-6 flex-1"
+                  >
+                    <h3
+                      class="font-bold text-[#111812] dark:text-white text-sm mb-4"
+                    >
+                      Weekly Volume
+                    </h3>
+                    <div class="flex items-end justify-between h-32 gap-2 mt-2">
+                      <div
+                        class="w-full bg-primary/20 rounded-t-sm h-[40%] hover:bg-primary/40 transition-colors relative group"
+                      >
+                        <div
+                          class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded"
+                        >
+                          Mon
+                        </div>
+                      </div>
+                      <div
+                        class="w-full bg-primary/20 rounded-t-sm h-[60%] hover:bg-primary/40 transition-colors relative group"
+                      >
+                        <div
+                          class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded"
+                        >
+                          Tue
+                        </div>
+                      </div>
+                      <div
+                        class="w-full bg-primary/20 rounded-t-sm h-[50%] hover:bg-primary/40 transition-colors relative group"
+                      >
+                        <div
+                          class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded"
+                        >
+                          Wed
+                        </div>
+                      </div>
+                      <div
+                        class="w-full bg-primary rounded-t-sm h-[85%] hover:bg-primary/90 transition-colors relative group"
+                      >
+                        <div
+                          class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded"
+                        >
+                          Thu
+                        </div>
+                      </div>
+                      <div
+                        class="w-full bg-primary/20 rounded-t-sm h-[70%] hover:bg-primary/40 transition-colors relative group"
+                      >
+                        <div
+                          class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded"
+                        >
+                          Fri
+                        </div>
+                      </div>
+                      <div
+                        class="w-full bg-primary/20 rounded-t-sm h-[30%] hover:bg-primary/40 transition-colors relative group"
+                      >
+                        <div
+                          class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded"
+                        >
+                          Sat
+                        </div>
+                      </div>
+                      <div
+                        class="w-full bg-primary/20 rounded-t-sm h-[20%] hover:bg-primary/40 transition-colors relative group"
+                      >
+                        <div
+                          class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded"
+                        >
+                          Sun
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="flex justify-between mt-2 text-xs text-gray-400"
+                    >
+                      <span>Mon</span>
+                      <span>Sun</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
