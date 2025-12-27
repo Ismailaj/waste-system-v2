@@ -1,5 +1,6 @@
 async function loadDashboard() {
-  const token = localStorage.getItem("token"); // 1. Retrieves your "ID card" from login.
+  const token = localStorage.getItem("userToken"); // 1. Retrieves your "ID card" from login.
+  const logOutBtn = document.getElementById("logout-button");//logs user out when clicked
   const user = JSON.parse(localStorage.getItem("user")); // Retrieve the saved user object.
   if (!token) {
     window.location.href = "login.html"; // 2. No token? Redirect to login.
@@ -26,7 +27,9 @@ async function loadDashboard() {
       if (user && user.fullname) {
         document.getElementById("user-name").innerText = user.fullname;
       }
-      document.getElementById("total-reports-count").innerText = `${data.stats.totalReports}`;
+      document.getElementById(
+        "total-reports-count"
+      ).innerText = `${data.stats.totalReports}`;
       document.getElementById(
         "resolved-incidents-count"
       ).innerText = `${data.stats.resolvedIncidents}`;
@@ -36,12 +39,17 @@ async function loadDashboard() {
 
       // 6. Render the Table
       renderTable(data.reports);
+      logOutBtn.addEventListener("click", () => {
+        alert("Are you sure you want to logout?")
+        localStorage.removeItem("userToken");
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+      });
     }
   } catch (error) {
     console.error("Dashboard error:", error);
   }
 }
-
 function renderTable(reports) {
   const tableBody = document.getElementById("reports-table-body");
   tableBody.innerHTML = ""; // Clear placeholders

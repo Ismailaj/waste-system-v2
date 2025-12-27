@@ -16,11 +16,16 @@ form.addEventListener("submit", async (e) => {
     const data = await response.json();
     if (response.ok && data.success) {
       // 1. SAVE the token: This stores the "ID card" in the browser so other pages can see it.
-      localStorage.setItem("token", data.token);
-      window.location.href = "dashboard.html"
-
-      // 2. SAVE user info: Useful for showing "Welcome, Aj" without re-fetching.
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // Check role and redirect accordingly
+      if (data.user.role === "admin") {
+        localStorage.setItem("adminToken", data.token);
+        localStorage.setItem("adminUser", JSON.stringify(data.user));
+        window.location.href = "admin.html";
+      } else {
+        localStorage.setItem("userToken", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user)); // keeping 'user' for backward compatibility or just standard naming
+        window.location.href = "dashboard.html";
+      }
       messageElement.textContent = "Login successful: " + data?.message;
       console.log("Login successful:" + data?.message);
     } else messageElement.textContent = data.message;

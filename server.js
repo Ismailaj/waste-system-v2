@@ -13,7 +13,7 @@ app.use(cors()); //allows frontend requests
 app.use(express.json());
 
 // serve static frontend files
-// app.use(express.static("public"));
+app.use(express.static("public"));
 
 // connect to Mongo (fail fast on DB errors)
 connectDB().catch((err) => {
@@ -27,8 +27,8 @@ app.use("/api/users", router);
 app.get("/", (req, res) => {
   res.json("System running successfully");
 });
-app.listen(process.env.PORT || 5000, () => {
+app.listen(process.env.PORT || 5050, () => {
   console.log(
-    `Successful! Server running on port ${process.env.PORT || 5000} `
+    `Successful! Server running on port ${process.env.PORT || 5050} `
   );
 });

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>CleanCity - Waste Reporting System</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;800;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#13ec37",
+              "background-light": "#f6f8f6",
+              "background-dark": "#102213",
+              "text-main": "#111812",
+              "text-muted": "#618968",
+            },
+            fontFamily: {
+              display: ["Public Sans", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="font-display bg-background-light dark:bg-background-dark text-text-main dark:text-white transition-colors duration-200"
+  >
+    <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+      <!-- Navbar -->
+      <header
+        class="sticky top-0 z-50 flex items-center justify-between border-b border-solid border-[#dbe6dd] dark:border-zinc-800 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm px-6 py-4 lg:px-20"
+      >
+        <div class="flex items-center gap-4 text-text-main dark:text-white">
+          <div
+            class="flex items-center justify-center size-10 rounded-lg bg-primary/20 text-primary"
+          >
+            <span class="material-symbols-outlined text-2xl">recycling</span>
+          </div>
+          <h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">
+            CleanCity
+          </h2>
+        </div>
+        <div class="hidden md:flex items-center gap-9">
+          <a
+            class="text-sm font-bold hover:text-primary transition-colors"
+            href="#"
+            >About</a
+          >
+          <a
+            class="text-sm font-bold hover:text-primary transition-colors"
+            href="#"
+            >How it Works</a
+          >
+          <a
+            class="text-sm font-bold hover:text-primary transition-colors"
+            href="#"
+            >Contact</a
+          >
+        </div>
+        <div class="flex items-center gap-4">
+          <a
+            href="login.html"
+            class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#111812] text-sm font-bold hover:bg-opacity-90 transition-opacity"
+          >
+            <span class="truncate">Login</span>
+          </a>
+        </div>
+      </header>
+      <!-- Main Content Wrapper -->
+      <main class="flex flex-col items-center w-full">
+        <!-- Hero Section -->
+        <section class="w-full max-w-[1280px] px-6 py-12 lg:px-20 lg:py-20">
+          <div class="@container">
+            <div
+              class="flex flex-col-reverse gap-10 lg:flex-row lg:items-center lg:gap-16"
+            >
+              <div class="flex flex-col gap-6 flex-1 text-left">
+                <h1
+                  class="text-4xl font-black leading-tight tracking-[-0.033em] lg:text-6xl dark:text-white"
+                >
+                  Keep Our City <span class="text-primary">Clean</span>,<br />
+                  Together.
+                </h1>
+                <h2
+                  class="text-base font-normal leading-relaxed text-text-main/80 dark:text-white/80 lg:text-lg max-w-xl"
+                >
+                  The easiest way to report waste, schedule pickups, and manage
+                  city cleanliness. Join citizens, collectors, and admins in
+                  making our environment cleaner.
+                </h2>
+              </div>
+              <div class="flex-1 w-full">
+                <div
+                  class="w-full aspect-[4/3] bg-center bg-no-repeat bg-cover rounded-2xl shadow-2xl overflow-hidden relative group"
+                  data-alt="Illustration of a clean green city with people recycling"
+                  style="
+                    background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBUbL_EB_jRf5su2PVcFCOeCcCOOmnKjyhQ4gyHxInSp94CAUQejnSFqmRq3SIn2nTyAQKZFMaTerFeBvN898gXQ6PHzM5CvrEsrj0kxtUM1Vr08grMaJMgSlTSt8pFlmh-w1R82Xc2UG4rnKw4LBjnNMU8MjAEN7UnhF4Ekt46LFWh7alqtJ_7jBzSEa845qsPYakop1KODhNMWIhl6P2ZKmcXAoM5vriEAuaQgtRRaTgZheFxNY9zl1Nhs41O17yYEmQKA-YZ1oY');
+                  "
+                >
+                  <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"
+                  ></div>
+                  <div class="absolute bottom-6 left-6 text-white">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="material-symbols-outlined text-primary"
+                        >location_on</span
+                      >
+                      <span
+                        class="text-sm font-bold bg-black/40 px-2 py-1 rounded backdrop-blur-md"
+                        data-location="Portland, Oregon"
+                        >Kano, Nigeria</span
+                      >
+                    </div>
+                    <p class="font-medium text-sm text-white/90">
+                      <!-- Community cleanup in progress -->
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Stats Section -->
+        <section
+          class="w-full bg-white dark:bg-zinc-900 border-y border-[#dbe6dd] dark:border-zinc-800"
+        >
+          <div class="max-w-[1280px] mx-auto px-6 py-12 lg:px-20">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div
+                class="flex flex-col gap-2 rounded-xl p-6 border border-[#dbe6dd] dark:border-zinc-800 bg-background-light dark:bg-background-dark shadow-sm hover:border-primary/50 transition-colors"
+              >
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="p-2 bg-primary/10 rounded-full text-primary">
+                    <span class="material-symbols-outlined">assignment</span>
+                  </div>
+                  <p
+                    class="text-text-main dark:text-white text-base font-medium"
+                  >
+                    Waste Reports
+                  </p>
+                </div>
+                <p
+                  class="text-text-main dark:text-white text-4xl font-black tracking-tight"
+                >
+                  12,450
+                </p>
+                <p class="text-sm text-text-muted dark:text-zinc-400">
+                  Submitted this month
+                </p>
+              </div>
+              <div
+                class="flex flex-col gap-2 rounded-xl p-6 border border-[#dbe6dd] dark:border-zinc-800 bg-background-light dark:bg-background-dark shadow-sm hover:border-primary/50 transition-colors"
+              >
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="p-2 bg-primary/10 rounded-full text-primary">
+                    <span class="material-symbols-outlined">check_circle</span>
+                  </div>
+                  <p
+                    class="text-text-main dark:text-white text-base font-medium"
+                  >
+                    Pickups Completed
+                  </p>
+                </div>
+                <p
+                  class="text-text-main dark:text-white text-4xl font-black tracking-tight"
+                >
+                  98%
+                </p>
+                <p class="text-sm text-text-muted dark:text-zinc-400">
+                  Resolution rate
+                </p>
+              </div>
+              <div
+                class="flex flex-col gap-2 rounded-xl p-6 border border-[#dbe6dd] dark:border-zinc-800 bg-background-light dark:bg-background-dark shadow-sm hover:border-primary/50 transition-colors"
+              >
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="p-2 bg-primary/10 rounded-full text-primary">
+                    <span class="material-symbols-outlined">group</span>
+                  </div>
+                  <p
+                    class="text-text-main dark:text-white text-base font-medium"
+                  >
+                    Active Members
+                  </p>
+                </div>
+                <p
+                  class="text-text-main dark:text-white text-4xl font-black tracking-tight"
+                >
+                  5,200+
+                </p>
+                <p class="text-sm text-text-muted dark:text-zinc-400">
+                  Cleaning up the city
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Feature Section -->
+
+        <!-- CTA Section -->
+        <section
+          class="w-full px-6 py-10 lg:px-20 lg:py-20 bg-white dark:bg-zinc-900 mt-10"
+        >
+          <div
+            class="max-w-[960px] mx-auto bg-background-light dark:bg-background-dark rounded-3xl p-8 lg:p-16 text-center border border-[#dbe6dd] dark:border-zinc-800 shadow-xl overflow-hidden relative"
+          >
+            <!-- Decor background blobs -->
+            <div
+              class="absolute -top-20 -left-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl"
+            ></div>
+            <div
+              class="absolute -bottom-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl"
+            ></div>
+            <div class="relative z-10 flex flex-col items-center gap-6">
+              <h2
+                class="text-3xl lg:text-5xl font-black text-text-main dark:text-white leading-tight"
+              >
+                Ready to clean up the city?
+              </h2>
+              <p
+                class="text-base lg:text-lg text-text-main/70 dark:text-white/70 max-w-xl"
+              >
+                Create an account today or log in to access your dashboard. It
+                takes less than 2 minutes to get started.
+              </p>
+              <div
+                class="flex flex-col sm:flex-row gap-4 w-full justify-center mt-4"
+              >
+                <a
+                  href="signup.html"
+                  class="flex min-w-[200px] cursor-pointer items-center justify-center rounded-lg h-12 px-6 bg-primary text-[#111812] text-base font-bold hover:bg-opacity-90 transition-all shadow-lg shadow-primary/25"
+                >
+                  <span class="truncate">Get Started Now</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
