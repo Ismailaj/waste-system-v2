@@ -54,6 +54,11 @@ if (logoutBtn) {
   });
 }
 
+document.querySelector(".home-btn").addEventListener("click", () => {
+  localStorage.removeItem("userToken");
+  localStorage.removeItem("user");
+});
+
 function renderTable(reports) {
   const tableBody = document.getElementById("reports-table-body");
   tableBody.innerHTML = ""; // Clear placeholders

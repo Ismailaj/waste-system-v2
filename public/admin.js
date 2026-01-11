@@ -1,15 +1,3 @@
-// Check if user is admin on load
-// const incidents = document.getElementById("incidents");
-// incidents.addEventListener("click", async () => {
-//   await fetch("http://localhost:5050/api/users/reports",
-//     {
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-//       },
-//     }
-//   )
-// });
-
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("adminToken");
   const user = JSON.parse(localStorage.getItem("adminUser") || "{}");
