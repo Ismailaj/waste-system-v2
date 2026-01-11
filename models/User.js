@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      // required: true,
+      enum: ["citizen", "admin", "driver"],
       default: "citizen",
     },
   },
@@ -30,6 +30,9 @@ const userSchema = new mongoose.Schema(
     timestamps: true, //automatically adds createdAt and updatedAt
   }
 );
+
+// Add index for role-based queries
+userSchema.index({ role: 1 });
 
 
 
