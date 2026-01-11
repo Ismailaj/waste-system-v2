@@ -1,14 +1,5 @@
 // Check if user is admin on load
-// const incidents = document.getElementById("incidents");
-// incidents.addEventListener("click", async () => {
-//   await fetch("http://localhost:5050/api/users/reports",
-//     {
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-//       },
-//     }
-//   )
-// });
+let availableDrivers = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("adminToken");
@@ -21,10 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Update header with user name
-  const nameElement = document.querySelector(".text-right p");
-  if (nameElement) {
-    nameElement.innerText = user.fullname || "Admin";
-  }
+  const nameElements = document.querySelectorAll("#admin-name");
+  nameElements.forEach(el => {
+    if (el) el.innerText = user.fullname || "Admin";
+  });
 
   // Helper to remove active class from sidebar links
   const removeActive = () => {
@@ -64,8 +55,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Load drivers for assignment functionality
+  loadDrivers();
   loadDashboard();
 });
+
+async function loadDrivers() {
+  const token = localStorage.getItem("adminToken");
+  
+  try {
+    const response = await fetch("http://localhost:5050/api/users/drivers", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      availableDrivers = data.drivers;
+    }
+  } catch (error) {
+    console.error("Error loading drivers:", error);
+  }
+}
 
 async function loadDashboard() {
   // Update header title
@@ -130,6 +142,11 @@ function renderUsers(users) {
       year: "numeric",
     });
 
+    // Role-specific styling
+    let roleColor = "bg-gray-100 text-gray-800";
+    if (user.role === "admin") roleColor = "bg-purple-100 text-purple-800";
+    if (user.role === "driver") roleColor = "bg-blue-100 text-blue-800";
+
     card.innerHTML = `
         <div class="flex items-center gap-4 mb-4">
             <div class="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl">
@@ -139,11 +156,7 @@ function renderUsers(users) {
                 <h3 class="font-bold text-[#111812] dark:text-white text-lg">${
                   user.fullname
                 }</h3>
-                <span class="px-2 py-0.5 text-xs font-bold rounded ${
-                  user.role === "admin"
-                    ? "bg-purple-100 text-purple-800"
-                    : "bg-gray-100 text-gray-800"
-                } uppercase tracking-wider">
+                <span class="px-2 py-0.5 text-xs font-bold rounded ${roleColor} uppercase tracking-wider">
                     ${user.role}
                 </span>
             </div>
@@ -194,15 +207,12 @@ async function fetchReports() {
 
 function updateStats(reports) {
   // Count counts
-  const pending = reports.filter((r) => r.status === "Pending").length;
+  const pending = reports.filter((r) => r.status === "Pending" || r.status === "Assigned").length;
   const resolved = reports.filter(
     (r) => r.status === "Completed" || r.status === "Resolved"
   ).length;
 
   // Update DOM
-  // Note: We need to find the specific elements. Since I didn't add IDs to the stats in HTML,
-  // I will assume the first number is pending (field activity) and second is resolved (system alerts) based on the layout.
-  // A better approach for the future is to add IDs to these span elements.
   const statNumbers = document.querySelectorAll(".text-3xl.font-bold");
   if (statNumbers.length >= 2) {
     statNumbers[0].innerText = pending;
@@ -235,17 +245,15 @@ function renderReports(reports) {
     // Determine status color
     let statusColor = "bg-gray-100 text-gray-800";
     if (report.status === "Pending")
-      statusColor =
-        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
+      statusColor = "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
+    else if (report.status === "Assigned")
+      statusColor = "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
     else if (report.status === "Completed" || report.status === "Resolved")
-      statusColor =
-        "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+      statusColor = "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
     else if (report.status === "Rejected")
-      statusColor =
-        "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+      statusColor = "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
     else if (report.status === "In Progress")
-      statusColor =
-        "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+      statusColor = "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
 
     // Use the first photo from the array if available
     let imageSection = "";
@@ -263,31 +271,45 @@ function renderReports(reports) {
 
     // Action Buttons based on status
     let actions = "";
-    if (report.status === "Pending" || report.status === "In Progress") {
+    if (report.status === "Pending") {
       actions = `
-            <button onclick="updateStatus('${report._id}', 'Completed')" class="flex-1 py-2 text-xs font-bold text-center text-white bg-green-600 hover:bg-green-700 rounded transition-colors">
-                Mark Completed
-            </button>
-            <button onclick="updateStatus('${report._id}', 'Rejected')" class="px-3 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-[#233b26] rounded border border-gray-200 dark:border-gray-700 transition-colors">
-                Dismiss
-            </button>
-        `;
-      if (report.status === "Pending") {
-        actions = `
-             <button onclick="updateStatus('${report._id}', 'In Progress')" class="flex-1 py-2 text-xs font-bold text-center text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors">
-                Assign Driver
-            </button>
-            ${actions}
-            `;
-      }
+        <button onclick="showAssignDriverModal('${report._id}')" class="flex-1 py-2 text-xs font-bold text-center text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors">
+          Assign Driver
+        </button>
+        <button onclick="updateStatus('${report._id}', 'Rejected')" class="px-3 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-[#233b26] rounded border border-gray-200 dark:border-gray-700 transition-colors">
+          Reject
+        </button>
+      `;
+    } else if (report.status === "Assigned" || report.status === "In Progress") {
+      const driverName = report.assignedDriver ? report.assignedDriver.fullname : 'Unknown Driver';
+      actions = `
+        <div class="text-xs text-gray-600 mb-2">
+          <span class="material-symbols-outlined text-sm">person</span>
+          Assigned to: ${driverName}
+        </div>
+        <button onclick="updateStatus('${report._id}', 'Completed')" class="flex-1 py-2 text-xs font-bold text-center text-white bg-green-600 hover:bg-green-700 rounded transition-colors">
+          Mark Completed
+        </button>
+      `;
     } else {
-      actions = `
-             <span class="text-xs text-gray-500 font-medium italic">No actions available</span>
-        `;
+      actions = `<span class="text-xs text-gray-500 font-medium italic">No actions available</span>`;
     }
 
+    // Admin report indicator
+    const adminIndicator = report.isAdminReport ? 
+      `<div class="absolute top-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-bold">ADMIN</div>` : '';
+
+    // Rejection message display
+    const rejectionMessage = report.status === 'Rejected' && report.rejectionMessage ?
+      `<div class="text-xs text-red-600 bg-red-50 p-2 rounded mt-2">
+        <strong>Rejection Reason:</strong> ${report.rejectionMessage}
+      </div>` : '';
+
     card.innerHTML = `
-      ${imageSection}
+      <div class="relative">
+        ${imageSection}
+        ${adminIndicator}
+      </div>
       <div class="p-4 flex flex-col gap-3 flex-1">
         <div class="flex justify-between items-start">
              <span class="px-2 py-1 text-xs font-bold rounded ${statusColor} uppercase tracking-wider">${
@@ -297,16 +319,17 @@ function renderReports(reports) {
         </div>
         <div>
             <h3 class="font-bold text-[#111812] dark:text-white mb-1 line-clamp-1">${
-              report.category || "General Issue"
+              report.category ? report.category.replace('_', ' ').toUpperCase() : "General Issue"
             }</h3>
             <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">${
-              report.description
+              report.description || 'No description provided'
             }</p>
         </div>
         <div class="flex items-center gap-2 text-xs text-gray-500 mt-auto pt-2 border-t border-gray-100 dark:border-gray-800">
              <span class="material-symbols-outlined text-sm">location_on</span>
              <span class="truncate">${report.address}</span>
         </div>
+        ${rejectionMessage}
         <div class="flex gap-2 mt-2">
             ${actions}
         </div>
@@ -315,6 +338,90 @@ function renderReports(reports) {
 
     grid.appendChild(card);
   });
+}
+
+// Driver Assignment Modal Functions
+function showAssignDriverModal(reportId) {
+  if (availableDrivers.length === 0) {
+    alert('No drivers available for assignment. Please ensure there are users with driver role.');
+    return;
+  }
+
+  const driverOptions = availableDrivers.map(driver => 
+    `<option value="${driver._id}">${driver.fullname} (${driver.email})</option>`
+  ).join('');
+
+  const modalHTML = `
+    <div id="assign-driver-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white dark:bg-[#1a2e1d] rounded-lg p-6 w-full max-w-md mx-4">
+        <h3 class="text-lg font-bold text-[#111812] dark:text-white mb-4">Assign Driver</h3>
+        <form id="assign-driver-form">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Select Driver:
+            </label>
+            <select id="driver-select" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+              <option value="">Choose a driver...</option>
+              ${driverOptions}
+            </select>
+          </div>
+          <div class="flex gap-3">
+            <button type="button" onclick="closeAssignDriverModal()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+              Cancel
+            </button>
+            <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+              Assign Driver
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  // Add form submit handler
+  document.getElementById('assign-driver-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const driverId = document.getElementById('driver-select').value;
+    if (driverId) {
+      assignDriver(reportId, driverId);
+    }
+  });
+}
+
+function closeAssignDriverModal() {
+  const modal = document.getElementById('assign-driver-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function assignDriver(reportId, driverId) {
+  const token = localStorage.getItem("adminToken");
+  
+  try {
+    const response = await fetch(`http://localhost:5050/api/users/reports/${reportId}/assign`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ driverId }),
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      alert('Driver assigned successfully!');
+      closeAssignDriverModal();
+      fetchReports(); // Refresh the reports
+    } else {
+      alert("Failed to assign driver: " + data.message);
+    }
+  } catch (error) {
+    console.error("Error assigning driver:", error);
+    alert("Error assigning driver");
+  }
 }
 
 // Make it global so HTML buttons can call it
@@ -348,3 +455,7 @@ window.updateStatus = async (id, status) => {
     alert("Error updating status");
   }
 };
+
+// Make functions global for HTML onclick handlers
+window.showAssignDriverModal = showAssignDriverModal;
+window.closeAssignDriverModal = closeAssignDriverModal;
