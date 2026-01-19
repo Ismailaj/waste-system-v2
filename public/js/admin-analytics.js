@@ -425,20 +425,42 @@ class AdminAnalyticsDashboard {
       let data = this.getCachedData(cacheKey);
 
       if (!data) {
+        // Show progress for potentially large datasets
+        this.showProgressIndicator('Loading trends data...');
+        
         const params = this.buildAPIParams(filters);
-        data = await this.makeAPICall(`${this.endpoints.trends}?${params}`);
+        
+        // Add pagination and optimization parameters
+        const urlParams = new URLSearchParams(params);
+        urlParams.append('optimize', 'true');
+        urlParams.append('limit', '1000'); // Reasonable limit for trends
+        
+        data = await this.makeAPICall(`${this.endpoints.trends}?${urlParams}`);
+        
+        // Handle large dataset warnings
+        if (data.performance && data.performance.datasetSize) {
+          this.handleDatasetSizeWarning(data.performance.datasetSize);
+        }
+        
         this.setCachedData(cacheKey, data);
+        this.hideProgressIndicator();
       }
 
       if (data.success) {
         this.renderTrendsVisualization(data.data);
         this.updateTrendsSummary(data.data);
         this.updateDataQuality(data.dataQuality);
+        
+        // Show performance metrics if available
+        if (data.performance) {
+          this.updatePerformanceMetrics(data.performance);
+        }
       } else {
         throw new Error(data.message || 'Failed to load trends data');
       }
 
     } catch (error) {
+      this.hideProgressIndicator();
       console.error('[ERROR] AdminAnalyticsDashboard - loadTrendsData:', error.message);
       throw error;
     }
@@ -1999,6 +2021,154 @@ class AdminAnalyticsDashboard {
         loadingIndicator.classList.add('hidden');
         this.isLoading = false;
       }
+    }
+  }
+
+  /**
+   * Show progress indicator with message
+   * @param {String} message - Progress message
+   */
+  showProgressIndicator(message = 'Loading...') {
+    const indicator = document.getElementById('loading-indicator');
+    if (indicator) {
+      const messageElement = indicator.querySelector('p');
+      if (messageElement) {
+        messageElement.textContent = message;
+      }
+      indicator.classList.remove('hidden');
+      this.isLoading = true;
+    }
+  }
+
+  /**
+   * Hide progress indicator
+   */
+  hideProgressIndicator() {
+    const indicator = document.getElementById('loading-indicator');
+    if (indicator) {
+      indicator.classList.add('hidden');
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * Handle dataset size warnings and optimization suggestions
+   * @param {Object} datasetSize - Dataset size information
+   */
+  handleDatasetSizeWarning(datasetSize) {
+    try {
+      const { totalDocuments, processingComplexity, recommendedPageSize } = datasetSize;
+      
+      if (totalDocuments > 50000) {
+        this.showDatasetWarning(
+          'Large Dataset Detected',
+          `Processing ${totalDocuments.toLocaleString()} records. Consider applying additional filters for better performance.`,
+          'warning'
+        );
+      } else if (processingComplexity === 'high') {
+        this.showDatasetWarning(
+          'Complex Processing',
+          'This query involves complex data processing. Results may take longer to load.',
+          'info'
+        );
+      }
+
+      // Update recommended settings
+      if (recommendedPageSize < 100) {
+        console.log(`[INFO] AdminAnalyticsDashboard - Recommended page size: ${recommendedPageSize}`);
+      }
+
+    } catch (error) {
+      console.error('[ERROR] AdminAnalyticsDashboard - handleDatasetSizeWarning:', error.message);
+    }
+  }
+
+  /**
+   * Show dataset warning notification
+   * @param {String} title - Warning title
+   * @param {String} message - Warning message
+   * @param {String} type - Warning type (warning, info, error)
+   */
+  showDatasetWarning(title, message, type = 'warning') {
+    try {
+      // Create warning notification
+      const warningDiv = document.createElement('div');
+      warningDiv.className = `fixed top-4 right-4 max-w-sm p-4 rounded-lg shadow-lg z-50 ${
+        type === 'warning' ? 'bg-yellow-50 border border-yellow-200' :
+        type === 'error' ? 'bg-red-50 border border-red-200' :
+        'bg-blue-50 border border-blue-200'
+      }`;
+
+      const iconColor = type === 'warning' ? 'text-yellow-600' :
+                       type === 'error' ? 'text-red-600' :
+                       'text-blue-600';
+
+      const textColor = type === 'warning' ? 'text-yellow-800' :
+                       type === 'error' ? 'text-red-800' :
+                       'text-blue-800';
+
+      warningDiv.innerHTML = `
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <span class="material-symbols-outlined ${iconColor}">
+              ${type === 'warning' ? 'warning' : type === 'error' ? 'error' : 'info'}
+            </span>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium ${textColor}">${title}</h3>
+            <p class="mt-1 text-sm ${textColor}">${message}</p>
+          </div>
+          <div class="ml-auto pl-3">
+            <button class="inline-flex ${textColor} hover:${textColor.replace('800', '900')}" onclick="this.parentElement.parentElement.parentElement.remove()">
+              <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(warningDiv);
+
+      // Auto-remove after 10 seconds
+      setTimeout(() => {
+        if (warningDiv.parentElement) {
+          warningDiv.remove();
+        }
+      }, 10000);
+
+    } catch (error) {
+      console.error('[ERROR] AdminAnalyticsDashboard - showDatasetWarning:', error.message);
+    }
+  }
+
+  /**
+   * Update performance metrics display
+   * @param {Object} performance - Performance metrics
+   */
+  updatePerformanceMetrics(performance) {
+    try {
+      const { datasetSize, processingTime, optimizationApplied } = performance;
+      
+      // Update performance indicators in the UI
+      const perfElement = document.getElementById('performance-metrics');
+      if (perfElement) {
+        perfElement.innerHTML = `
+          <div class="text-xs text-gray-500 space-y-1">
+            <div>Dataset: ${datasetSize.totalDocuments?.toLocaleString() || 'Unknown'} records</div>
+            <div>Complexity: ${datasetSize.processingComplexity || 'Unknown'}</div>
+            ${optimizationApplied ? '<div class="text-green-600">✓ Optimized</div>' : ''}
+          </div>
+        `;
+      }
+
+      // Log performance metrics
+      console.log('[INFO] AdminAnalyticsDashboard - Performance metrics:', {
+        documents: datasetSize.totalDocuments,
+        complexity: datasetSize.processingComplexity,
+        optimized: optimizationApplied
+      });
+
+    } catch (error) {
+      console.error('[ERROR] AdminAnalyticsDashboard - updatePerformanceMetrics:', error.message);
     }
   }
 

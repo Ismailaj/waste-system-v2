@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics Dashboard - CleanCity Admin</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;900&amp;display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -13,6 +17,29 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#13ec37",
+              "background-light": "#f6f8f6",
+              "background-dark": "#102213",
+            },
+            fontFamily: {
+              display: ["Public Sans", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
+    </script>
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -57,20 +84,26 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-background-light dark:bg-background-dark text-[#111812] dark:text-gray-100 font-display">
     <!-- Navigation Header -->
-    <nav class="bg-white shadow-sm border-b">
+    <nav class="bg-white dark:bg-[#1a2e1d] shadow-sm border-b border-[#dbe6dd] dark:border-[#2a402d]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <h1 class="text-xl font-semibold text-gray-900">CleanCity Analytics Dashboard</h1>
+                    <div class="flex items-center gap-3 mr-6">
+                        <div
+                            class="bg-center bg-no-repeat bg-cover rounded-full size-8"
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBezEpioL4Ob6c7PzRKCBa5mf0iKPcumaedIDNCNZW-6tSnhlA4Sq-KzxfVM1dZ9qr6ftzRiqVZQpbQmQkysQsDhEZ_kBCvicuKC35lVbIiF2hc6-trN4p2InagtzyGEyWX7GSYb7MSs4W9lVosIh9ZPjJG7vX_k-LoGPf7CNgkxPaERMr504L3biwkvq8--Z5kTbiNyzvMc3OwmuAN24KoxxnM6IQsP9FjE_L97UhvHyCiPVAY0rNTjNRMPZqTM1BDCVzDOFLJxr0');"
+                        ></div>
+                        <h1 class="text-xl font-bold text-[#111812] dark:text-white">CleanCity Analytics</h1>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button id="refresh-data" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <button id="refresh-data" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-[#233b26] hover:bg-gray-50 dark:hover:bg-[#2a402d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                         <span class="material-symbols-outlined mr-2">refresh</span>
                         Refresh
                     </button>
-                    <a href="admin.html" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    <a href="admin.html" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-[#233b26] hover:bg-gray-50 dark:hover:bg-[#2a402d]">
                         <span class="material-symbols-outlined mr-2">arrow_back</span>
                         Back to Admin
                     </a>
@@ -658,7 +691,13 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
         <div class="text-center text-sm text-gray-500">
             <p>Last updated: <span id="last-updated">Never</span></p>
-            <p>Data quality: <span id="data-quality-score">-</span>% | Cache status: <span id="cache-status">Unknown</span></p>
+            <div class="flex justify-center items-center space-x-4 mt-2">
+                <span>Data quality: <span id="data-quality-score">-</span>%</span>
+                <span>Cache status: <span id="cache-status">Unknown</span></span>
+                <div id="performance-metrics" class="text-left">
+                    <!-- Performance metrics will be populated by JavaScript -->
+                </div>
+            </div>
         </div>
     </div>
 
