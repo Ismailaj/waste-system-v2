@@ -3,6 +3,7 @@ import cors from "cors"; //allows html to communicate with backend
 import dotenv from "dotenv"; //imports my .env file
 import connectDB from "./config/db.js"; //my connectDB function
 import router from "./routes/userRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 dotenv.config(); //load/process credentials from my .env file
 const app = express(); //initialize express
@@ -21,8 +22,9 @@ connectDB().catch((err) => {
   process.exit(1);
 });
 
-//activate Route
+//activate Routes
 app.use("/api/users", router);
+app.use("/api/analytics", analyticsRoutes);
 
 app.get("/", (req, res) => {
   res.json("System running successfully");

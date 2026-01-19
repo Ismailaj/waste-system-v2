@@ -263,57 +263,170 @@ router.get('/heatmap', async (req, res) => {
 
 /**
  * GET /api/analytics/drivers
- * Get driver performance metrics
+ * Get driver performance metrics with enhanced calculations
  */
 router.get('/drivers', async (req, res) => {
   try {
     const { 
       metric = 'completion_rate', 
       period = '30d',
-      driverId = null 
+      driverId = null,
+      startDate,
+      endDate 
     } = req.query;
 
-    const cacheKey = cacheService.generateCacheKey('drivers', { metric, period, driverId });
+    // Determine date range
+    let dateRange;
+    if (startDate && endDate) {
+      dateRange = { startDate: new Date(startDate), endDate: new Date(endDate) };
+    } else {
+      // Parse period (e.g., '30d', '7d', '90d')
+      const days = parseInt(period.replace('d', '')) || 30;
+      const endDateCalc = new Date();
+      const startDateCalc = new Date();
+      startDateCalc.setDate(startDateCalc.getDate() - days);
+      dateRange = { startDate: startDateCalc, endDate: endDateCalc };
+    }
+
+    const cacheKey = cacheService.generateCacheKey('drivers_enhanced', { metric, period, driverId }, dateRange);
     let driverData = await cacheService.getCachedData(cacheKey);
 
     if (!driverData) {
-      driverData = await dataAggregation.aggregateDriverStats(period, {});
+      // Use enhanced driver metrics calculation
+      driverData = await analyticsEngine.calculateDriverMetrics(driverId, dateRange);
       await cacheService.cacheAnalyticsData(cacheKey, driverData);
-    }
-
-    // Filter by specific driver if requested
-    if (driverId && driverData.drivers) {
-      const specificDriver = driverData.drivers.find(d => d.driverId.toString() === driverId);
-      if (specificDriver) {
-        driverData = {
-          ...driverData,
-          drivers: [specificDriver],
-          driverCount: 1
-        };
-      } else {
-        return res.status(404).json({
-          error: {
-            code: 'DRIVER_NOT_FOUND',
-            message: 'Driver not found or has no assigned reports in the specified period',
-            timestamp: new Date().toISOString()
-          }
-        });
-      }
     }
 
     res.json({
       success: true,
       data: driverData,
-      filters: { metric, period, driverId },
+      filters: { metric, period, driverId, dateRange },
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
     console.error('[ERROR] Analytics API - /drivers:', error.message);
     res.status(500).json({
+      success: false,
       error: {
         code: 'DRIVER_METRICS_ERROR',
         message: 'Failed to generate driver performance metrics',
+        details: error.message,
+        timestamp: new Date().toISOString()
+      }
+    });
+  }
+});
+
+/**
+ * GET /api/analytics/drivers/:driverId/ranking
+ * Get driver performance ranking and peer comparison
+ */
+router.get('/drivers/:driverId/ranking', async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    const { startDate, endDate, period = '30d' } = req.query;
+
+    // Determine date range
+    let dateRange;
+    if (startDate && endDate) {
+      dateRange = { startDate: new Date(startDate), endDate: new Date(endDate) };
+    } else {
+      const days = parseInt(period.replace('d', '')) || 30;
+      const endDateCalc = new Date();
+      const startDateCalc = new Date();
+      startDateCalc.setDate(startDateCalc.getDate() - days);
+      dateRange = { startDate: startDateCalc, endDate: endDateCalc };
+    }
+
+    const cacheKey = cacheService.generateCacheKey('driver_ranking', { driverId }, dateRange);
+    let rankingData = await cacheService.getCachedData(cacheKey);
+
+    if (!rankingData) {
+      rankingData = await analyticsEngine.getDriverPerformanceRanking(driverId, dateRange);
+      await cacheService.cacheAnalyticsData(cacheKey, rankingData, 300); // Cache for 5 minutes
+    }
+
+    res.json({
+      success: true,
+      data: rankingData,
+      filters: { driverId, dateRange },
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('[ERROR] Analytics API - /drivers/:driverId/ranking:', error.message);
+    
+    if (error.message.includes('Driver not found')) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'DRIVER_NOT_FOUND',
+          message: 'Driver not found in performance data for the specified period',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'DRIVER_RANKING_ERROR',
+        message: 'Failed to generate driver ranking',
+        details: error.message,
+        timestamp: new Date().toISOString()
+      }
+    });
+  }
+});
+
+/**
+ * GET /api/analytics/drivers/assignment-tracking
+ * Get driver assignment tracking and accuracy metrics
+ */
+router.get('/drivers/assignment-tracking', async (req, res) => {
+  try {
+    const { 
+      driverId = null,
+      startDate,
+      endDate,
+      period = '30d' 
+    } = req.query;
+
+    // Determine date range
+    let dateRange;
+    if (startDate && endDate) {
+      dateRange = { startDate: new Date(startDate), endDate: new Date(endDate) };
+    } else {
+      const days = parseInt(period.replace('d', '')) || 30;
+      const endDateCalc = new Date();
+      const startDateCalc = new Date();
+      startDateCalc.setDate(startDateCalc.getDate() - days);
+      dateRange = { startDate: startDateCalc, endDate: endDateCalc };
+    }
+
+    const cacheKey = cacheService.generateCacheKey('assignment_tracking', { driverId }, dateRange);
+    let trackingData = await cacheService.getCachedData(cacheKey);
+
+    if (!trackingData) {
+      trackingData = await analyticsEngine.getDriverAssignmentTracking(driverId, dateRange);
+      await cacheService.cacheAnalyticsData(cacheKey, trackingData);
+    }
+
+    res.json({
+      success: true,
+      data: trackingData,
+      filters: { driverId, dateRange },
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('[ERROR] Analytics API - /drivers/assignment-tracking:', error.message);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'ASSIGNMENT_TRACKING_ERROR',
+        message: 'Failed to generate assignment tracking metrics',
         details: error.message,
         timestamp: new Date().toISOString()
       }
