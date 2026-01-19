@@ -4,6 +4,8 @@ import dotenv from "dotenv"; //imports my .env file
 import connectDB from "./config/db.js"; //my connectDB function
 import router from "./routes/userRoutes.js";
 
+import driverRoutes from "./routes/driverRoutes.js";
+
 dotenv.config(); //load/process credentials from my .env file
 const app = express(); //initialize express
 
@@ -14,6 +16,7 @@ app.use(express.json());
 
 // serve static frontend files
 app.use(express.static("public"));
+app.use("/uploads", express.static("uploads"));
 
 // connect to Mongo (fail fast on DB errors)
 connectDB().catch((err) => {
@@ -23,6 +26,7 @@ connectDB().catch((err) => {
 
 //activate Route
 app.use("/api/users", router);
+app.use("/api/driver", driverRoutes);
 
 app.get("/", (req, res) => {
   res.json("System running successfully");

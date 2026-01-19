@@ -17,11 +17,15 @@
           0 2px 4px -2px rgba(0, 0, 0, 0.06);
       }
     </style>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
   </head>
   <body class="bg-gray-100">
     <div class="max-w-7xl mx-auto px-6 py-8">
       <nav
-        class="fixed top-0 right-0 left-0 flex items-center justify-between bg-gray-800 h-16 px-4 sm:px-6 shadow-lg"
+        class="fixed top-0 right-0 left-0 flex items-center justify-between bg-gray-800 h-16 px-4 sm:px-6 shadow-lg z-50"
       >
         <div
           class="logo flex items-center gap-2 bg-gray-700 px-3 sm:px-4 py-2 rounded"
@@ -29,7 +33,7 @@
           <!-- <img src="../assets/system-logo.png" alt="logo" class="w-8 h-8" /> -->
           <a class="home-btn" href="index.html">
             <h2 class="font-bold text-gray-200 text-sm sm:text-base">
-              Waste Watch
+              WasteResolve
             </h2>
           </a>
         </div>
@@ -37,6 +41,32 @@
         <ul
           class="nav-links hidden sm:flex gap-4 sm:gap-8 flex-1 mx-auto justify-end mr-5"
         >
+          <li>
+            <div class="relative cursor-pointer mt-1" onclick="toggleNotifications()">
+              <span class="material-symbols-outlined text-white text-2xl"
+                >notifications</span
+              >
+              <span
+                id="notification-badge"
+                class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden"
+              >
+                0
+              </span>
+              <!-- Notification Dropdown -->
+              <div
+                id="notification-dropdown"
+                class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl overflow-hidden hidden z-50 text-gray-800"
+              >
+                <div class="p-3 border-b text-sm font-bold text-gray-600">
+                  Notifications
+                </div>
+                <div id="notification-list" class="max-h-60 overflow-y-auto">
+                    <!-- Items injected here -->
+                    <p class="text-xs text-gray-500 p-4 text-center">No new notifications</p>
+                </div>
+              </div>
+            </div>
+          </li>
           <li>
             <a
               href="dashboard.html"
@@ -101,16 +131,45 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-10">
-          <div class="table">
-            <h2 class="font-bold text-xl">My Waste Reports</h2>
-            <table class="w-full text-left mt-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-10">
+          <div class="w-full lg:col-span-2 overflow-x-auto">
+            <div class="flex items-center min-w-[600px]">
+              <h2 class="font-bold text-xl mr-5">My Waste Reports</h2>
+              <div class="relative">
+                <select
+                  id="status-filter"
+                  class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+                <div
+                  class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
+                >
+                  <svg
+                    class="fill-current h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <table class="w-full text-left mt-6 min-w-[600px]">
               <thead>
                 <tr class="border-b">
                   <th class="py-2 text-gray-500">Report ID</th>
                   <th class="py-2 text-gray-500">Waste Type</th>
                   <th class="py-2 text-gray-500">Date Reported</th>
                   <th class="py-2 text-gray-500">Status</th>
+                  <th class="py-2 text-gray-500">Notes</th>
+                  <th class="py-2 text-gray-500">Actions</th>
                 </tr>
               </thead>
               <tbody id="reports-table-body">
@@ -157,15 +216,25 @@
           </div>
 
           <div class="bg-white rounded-xl shadow p-4 h-[400px]">
-            <h2 class="text-lg font-bold mb-2">Map of My Reports</h2>
+            <h2 class="text-lg font-bold mb-2">Did You Know?</h2>
             <div
-              id="map"
-              class="w-full h-[90%] rounded-lg border border-gray-200"
-            ></div>
+              class="w-full h-[90%] rounded-lg border border-green-100 bg-green-50 flex flex-col items-center justify-center p-6 text-center"
+            >
+              <div class="bg-green-100 p-3 rounded-full mb-4">
+                <span class="material-symbols-outlined text-green-600 text-3xl"
+                  >lightbulb</span
+                >
+              </div>
+              <p id="eco-tip-content" class="text-gray-700 text-lg font-medium">
+                Loading tip...
+              </p>
+              <p class="text-sm text-green-600 mt-4 font-semibold">
+                Reduce • Reuse • Recycle
+              </p>
+            </div>
           </div>
         </div>
       </div>
-
     </div>
 
     <!-- Report form modal (loaded dynamically) -->
@@ -189,6 +258,102 @@
           </button>
         </div>
         <div id="report-modal-content" class="p-6"></div>
+      </div>
+    </div>
+
+    <!-- Report Details Modal -->
+    <div
+      id="details-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center"
+    >
+      <div
+        id="details-modal-backdrop"
+        class="absolute inset-0 bg-black/60 transition-opacity"
+      ></div>
+      <div
+        class="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden z-10 animate-fade-in-up"
+      >
+        <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+          <h3 class="text-xl font-bold text-gray-800" id="details-title">
+            Report Details
+          </h3>
+          <button
+            id="details-modal-close"
+            class="text-gray-500 hover:text-gray-700 focus:outline-none"
+          >
+            <span class="material-symbols-outlined text-2xl">close</span>
+          </button>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[70vh]">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <img
+                id="details-image"
+                src=""
+                alt="Waste Report"
+                class="w-full h-64 object-cover rounded-lg shadow-md bg-gray-200"
+              />
+            </div>
+            <div class="space-y-4">
+              <div>
+                <p class="text-sm text-gray-500 uppercase font-semibold">
+                  Status
+                </p>
+                <span
+                  id="details-status"
+                  class="inline-block px-3 py-1 rounded-full text-sm font-medium mt-1"
+                ></span>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 uppercase font-semibold">
+                  Category
+                </p>
+                <p id="details-category" class="text-lg font-medium capitalize">
+                  -
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 uppercase font-semibold">
+                  Date Reported
+                </p>
+                <p id="details-date" class="text-gray-800">-</p>
+              </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-6">
+            <p class="text-sm text-gray-500 uppercase font-semibold">
+              Description
+            </p>
+            <p
+              id="details-description"
+              class="text-gray-700 mt-2 bg-gray-50 p-4 rounded-lg border border-gray-100"
+            >
+              -
+            </p>
+          </div>
+          <div id="details-feedback-section" class="mt-6 hidden">
+            <p
+              class="text-sm text-gray-500 uppercase font-semibold"
+            >
+              Rejection Reason
+            </p>
+            <p
+              id="details-feedback"
+              class="text-red-700 mt-2 bg-red-50 p-4 rounded-lg border border-red-100"
+            >
+              -
+            </p>
+          </div>
+        </div>
+        <div class="p-4 border-t bg-gray-50 flex justify-end">
+          <button
+            id="details-modal-close-btn"
+            class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
 

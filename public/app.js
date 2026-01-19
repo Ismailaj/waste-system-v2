@@ -4,6 +4,7 @@ form.addEventListener("submit", async (e) => {
   const fullname = document.getElementById("fullname").value;
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
+  const role = document.getElementById("role").value;
   const messageElement = document.getElementById("message");
 
   messageElement.textContent = "";
@@ -18,6 +19,7 @@ form.addEventListener("submit", async (e) => {
         fullname,
         email,
         password,
+        role,
       }),
     });
 

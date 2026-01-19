@@ -10,7 +10,7 @@ const createAdmin = async () => {
     await mongoose.connect(process.env.MONGO_URL);
     console.log("Connected to MongoDB via", process.env.MONGO_URL);
 
-    const adminEmail = "admin@wastewise.com";
+    const adminEmail = "admin@wasteresolve.com";
     const adminPassword = "admin123";
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 

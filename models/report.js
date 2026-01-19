@@ -13,6 +13,23 @@ const reportSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    assignedDriver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    rejectionReason: {
+      type: String,
+      default: null,
+    },
+    priority: {
+      type: String,
+      enum: ["Low", "Medium", "High", "Critical"],
+      default: "Medium",
+    },
+    // internalNotes: {
+    //   type: String,
+    // },
   },
   {
     timestamps: true,

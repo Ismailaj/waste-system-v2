@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Admin Dashboard - WasteWise</title>
+    <title>Admin Dashboard - WasteResolve</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;900&amp;display=swap"
       rel="stylesheet"
@@ -47,7 +47,7 @@
         <div class="p-6 flex items-center gap-3">
           <div
             class="bg-center bg-no-repeat bg-cover rounded-full size-10"
-            data-alt="WasteWise Green Leaf Logo"
+            data-alt="WasteResolve Green Leaf Logo"
             style="
               background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBezEpioL4Ob6c7PzRKCBa5mf0iKPcumaedIDNCNZW-6tSnhlA4Sq-KzxfVM1dZ9qr6ftzRiqVZQpbQmQkysQsDhEZ_kBCvicuKC35lVbIiF2hc6-trN4p2InagtzyGEyWX7GSYb7MSs4W9lVosIh9ZPjJG7vX_k-LoGPf7CNgkxPaERMr504L3biwkvq8--Z5kTbiNyzvMc3OwmuAN24KoxxnM6IQsP9FjE_L97UhvHyCiPVAY0rNTjNRMPZqTM1BDCVzDOFLJxr0');
             "
@@ -56,7 +56,7 @@
             <h1
               class="text-[#111812] dark:text-white text-lg font-bold leading-normal"
             >
-              WasteWise
+              WasteResolve
             </h1>
             <p
               class="text-[#618968] dark:text-[#8ab392] text-xs font-medium uppercase tracking-wider"
@@ -73,6 +73,7 @@
               Main Menu
             </p>
             <a
+              id="dashboard-btn"
               class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#f0f4f1] dark:bg-[#233b26] text-[#111812] dark:text-white group"
               href="admin.html"
             >
@@ -89,6 +90,14 @@
             >
               <span class="material-symbols-outlined">group</span>
               <p class="text-sm font-medium leading-normal">Users</p>
+            </a>
+            <a
+              id="drivers-btn"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#111812] dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#233b26] transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">directions_car</span>
+              <p class="text-sm font-medium leading-normal">Drivers</p>
             </a>
           </div>
         </div>
@@ -245,6 +254,50 @@
           </div>
         </div>
       </main>
+    </div>
+    <!-- Driver Assignment Modal -->
+    <div
+      id="assignModal"
+      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center"
+    >
+      <div
+        class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm transform transition-all scale-100"
+      >
+        <h2 class="text-xl font-bold mb-4 text-gray-900">Assign Driver</h2>
+        <p class="text-sm text-gray-500 mb-4">
+          Select a driver for this report.
+        </p>
+
+        <div class="mb-4">
+          <label
+            class="block text-gray-700 text-sm font-bold mb-2"
+            for="driverSelect"
+          >
+            Driver
+          </label>
+          <select
+            id="driverSelect"
+            class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          >
+            <option value="">Loading drivers...</option>
+          </select>
+        </div>
+
+        <div class="flex items-center justify-end gap-2">
+          <button
+            id="closeAssignModalBtn"
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Cancel
+          </button>
+          <button
+            id="confirmAssignBtn"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Assign
+          </button>
+        </div>
+      </div>
     </div>
     <script src="admin.js"></script>
   </body>

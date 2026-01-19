@@ -43,4 +43,14 @@ const authenticateAdmin = (req, res, next) => {
   }
 };
 
-export { authenticate, authenticateAdmin };
+const authenticateDriver = (req, res, next) => {
+  if (req.user && req.user.role === "driver") {
+    next();
+  } else {
+    res
+      .status(403)
+      .json({ success: false, message: "Access denied. Drivers only." });
+  }
+};
+
+export { authenticate, authenticateAdmin, authenticateDriver };

@@ -14,19 +14,39 @@ document.addEventListener("DOMContentLoaded", () => {
     nameElement.innerText = user.fullname || "Admin";
   }
 
-  // Helper to remove active class from sidebar links
-  const removeActive = () => {
+  // Helper to manage active state
+  const setActive = (element) => {
     document.querySelectorAll("aside a").forEach((el) => {
+      // Remove active background
       el.classList.remove("bg-[#f0f4f1]", "dark:bg-[#233b26]");
-      el.querySelector("span").classList.remove("text-primary");
+      // Reset text colors to inactive state
+      el.classList.remove("dark:text-white");
+      el.classList.add("dark:text-gray-300");
+
+      // Reset icon color
+      const span = el.querySelector("span");
+      if (span) {
+        span.classList.remove("text-primary");
+        // Ensure regular text color is reset if needed, but for now just removing primary
+      }
     });
+
+    // Add active styles to clicked element
+    element.classList.add("bg-[#f0f4f1]", "dark:bg-[#233b26]");
+    element.classList.remove("dark:text-gray-300");
+    element.classList.add("dark:text-white");
+
+    // Add active icon style
+    const span = element.querySelector("span");
+    if (span) span.classList.add("text-primary");
   };
 
   // Setup Listeners
-  const incidentsBtn = document.getElementById("incidents");
-  if (incidentsBtn) {
-    incidentsBtn.addEventListener("click", (e) => {
+  const dashboardBtn = document.getElementById("dashboard-btn");
+  if (dashboardBtn) {
+    dashboardBtn.addEventListener("click", (e) => {
       e.preventDefault();
+      setActive(e.currentTarget);
       loadDashboard();
     });
   }
@@ -36,7 +56,17 @@ document.addEventListener("DOMContentLoaded", () => {
   if (usersBtn) {
     usersBtn.addEventListener("click", (e) => {
       e.preventDefault();
+      setActive(e.currentTarget);
       fetchUsers();
+    });
+  }
+  //drivers button listener
+  const driversBtn = document.getElementById("drivers-btn");
+  if (driversBtn) {
+    driversBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      setActive(e.currentTarget);
+      fetchAndRenderDrivers();
     });
   }
 
@@ -98,6 +128,8 @@ async function fetchUsers() {
   }
 }
 
+//
+
 function renderUsers(users) {
   const grid = document.getElementById("reports-grid");
   grid.innerHTML = "";
@@ -141,6 +173,96 @@ function renderUsers(users) {
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-lg">mail</span>
                 <span>${user.email}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg">calendar_today</span>
+                <span>Joined ${date}</span>
+            </div>
+        </div>
+      `;
+
+    grid.appendChild(card);
+  });
+}
+
+//render drivers
+async function fetchAndRenderDrivers() {
+  const token = localStorage.getItem("adminToken");
+  const grid = document.getElementById("reports-grid");
+
+  // Update section title
+  const sectionTitle = document.querySelector(".font-bold.text-base");
+  if (sectionTitle) sectionTitle.innerText = "Driver Management";
+
+  // Update header title
+  const headerTitle = document.querySelector("header h2");
+  if (headerTitle) headerTitle.innerText = "Drivers";
+
+  grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500">Loading drivers...</div>`;
+
+  try {
+    const response = await fetch("http://localhost:5050/api/users/drivers", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      grid.innerHTML = `<div class="col-span-full text-center text-red-500">Error: ${data.message}</div>`;
+      return;
+    }
+
+    renderDrivers(data.drivers);
+  } catch (error) {
+    console.error("Error fetching drivers:", error);
+    grid.innerHTML = `<div class="col-span-full text-center text-red-500">Failed to load drivers</div>`;
+  }
+}
+function renderDrivers(drivers) {
+  const grid = document.getElementById("reports-grid");
+  grid.innerHTML = "";
+
+  if (drivers.length === 0) {
+    grid.innerHTML = `<div class="col-span-full text-center text-gray-500 py-10">No drivers found.</div>`;
+    return;
+  }
+
+  drivers.forEach((driver) => {
+    const card = document.createElement("div");
+    card.className =
+      "flex flex-col rounded-xl border border-[#dbe6dd] dark:border-[#2a402d] bg-white dark:bg-[#1a2e1d] shadow-sm overflow-hidden hover:shadow-md transition-shadow p-6";
+
+    const date = new Date(driver.createdAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    card.innerHTML = `
+        <div class="flex items-center gap-4 mb-4">
+            <div class="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl">
+                ${driver.fullname.charAt(0).toUpperCase()}
+            </div>
+            <div>
+                <h3 class="font-bold text-[#111812] dark:text-white text-lg">${
+                  driver.fullname
+                }</h3>
+                <span class="px-2 py-0.5 text-xs font-bold rounded ${
+                  driver.role === "admin"
+                    ? "bg-purple-100 text-purple-800"
+                    : "bg-gray-100 text-gray-800"
+                } uppercase tracking-wider">
+                    ${driver.role}
+                </span>
+            </div>
+        </div>
+        
+        <div class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg">mail</span>
+                <span>${driver.email}</span>
             </div>
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-lg">calendar_today</span>
@@ -251,23 +373,19 @@ function renderReports(reports) {
 
     // Action Buttons based on status
     let actions = "";
-    if (report.status === "Pending" || report.status === "In Progress") {
+    if (report.status === "Pending") {
       actions = `
-            <button onclick="updateStatus('${report._id}', 'Completed')" class="flex-1 py-2 text-xs font-bold text-center text-white bg-green-600 hover:bg-green-700 rounded transition-colors">
-                Mark Completed
-            </button>
-            <button onclick="updateStatus('${report._id}', 'Rejected')" class="px-3 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-[#233b26] rounded border border-gray-200 dark:border-gray-700 transition-colors">
-                Dismiss
-            </button>
-        `;
-      if (report.status === "Pending") {
-        actions = `
-             <button onclick="updateStatus('${report._id}', 'In Progress')" class="flex-1 py-2 text-xs font-bold text-center text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors">
+             <button onclick="openAssignModal('${report._id}')" class="flex-1 py-2 text-xs font-bold text-center text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors">
                 Assign Driver
             </button>
-            ${actions}
-            `;
-      }
+        `;
+    } else if (report.status === "In Progress") {
+      // Option to re-assign if needed, or just show text
+      actions = `
+             <button onclick="openAssignModal('${report._id}')" class="flex-1 py-2 text-xs font-bold text-center text-blue-600 hover:bg-blue-50 border border-blue-600 rounded transition-colors">
+                Re-Assign Driver
+            </button>
+        `;
     } else {
       actions = `
              <span class="text-xs text-gray-500 font-medium italic">No actions available</span>
@@ -336,3 +454,91 @@ window.updateStatus = async (id, status) => {
     alert("Error updating status");
   }
 };
+
+// Driver Assignment Logic
+let currentReportIdToAssign = null;
+let driversList = [];
+
+async function fetchDriversForSelect() {
+  const token = localStorage.getItem("adminToken");
+  try {
+    const response = await fetch("http://localhost:5050/api/users/drivers", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await response.json();
+    if (data.success) {
+      driversList = data.drivers;
+      populateDriverSelect();
+    }
+  } catch (error) {
+    console.error("Error fetching drivers:", error);
+  }
+}
+
+function populateDriverSelect() {
+  const select = document.getElementById("driverSelect");
+  if (!select) return;
+  select.innerHTML = '<option value="">Select a driver...</option>';
+  driversList.forEach((driver) => {
+    const option = document.createElement("option");
+    option.value = driver._id;
+    option.textContent = driver.fullname;
+    select.appendChild(option);
+  });
+}
+
+window.openAssignModal = (reportId) => {
+  currentReportIdToAssign = reportId;
+  const modal = document.getElementById("assignModal");
+  modal.classList.remove("hidden");
+  if (driversList.length === 0) fetchDriversForSelect();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  // ... existing listeners ...
+  const closeAssignBtn = document.getElementById("closeAssignModalBtn");
+  const confirmAssignBtn = document.getElementById("confirmAssignBtn");
+  const modal = document.getElementById("assignModal");
+
+  if (closeAssignBtn) {
+    closeAssignBtn.addEventListener("click", () => {
+      modal.classList.add("hidden");
+      currentReportIdToAssign = null;
+    });
+  }
+
+  if (confirmAssignBtn) {
+    confirmAssignBtn.addEventListener("click", async () => {
+      const driverId = document.getElementById("driverSelect").value;
+      if (!driverId) {
+        alert("Please select a driver");
+        return;
+      }
+      const token = localStorage.getItem("adminToken");
+      try {
+        const response = await fetch(
+          `http://localhost:5050/api/users/reports/${currentReportIdToAssign}/assign`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ driverId }),
+          }
+        );
+        const data = await response.json();
+        if (data.success) {
+          modal.classList.add("hidden");
+          fetchReports(); // refresh
+          alert("Driver assigned successfully");
+        } else {
+          alert(data.message || "Assignment failed");
+        }
+      } catch (e) {
+        console.error(e);
+        alert("Error assigning driver");
+      }
+    });
+  }
+});

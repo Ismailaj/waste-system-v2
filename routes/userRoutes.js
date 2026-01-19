@@ -13,7 +13,9 @@ const router = express.Router();
 // registering new user. Signup page
 router.post("/signup", async (req, res) => {
   try {
-    const { fullname, email, password } = req.body;
+    const { fullname, email, password, role } = req.body;
+    console.log("Signup Request:", req.body); // Debug log
+
     if (!fullname || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -34,6 +36,7 @@ router.post("/signup", async (req, res) => {
       fullname,
       email,
       password: encryptedPassword,
+      role: role || "citizen",
     });
 
     const user = newUser.toObject();
@@ -76,10 +79,6 @@ router.post("/login", async (req, res) => {
         message: "User not found. Check your email and try again",
       });
     }
-
-    // return res
-    //   .status(200)
-    //   .json({ success: true, message: "Good! next is password check" });
 
     // now check if passed password match stored one
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -165,6 +164,17 @@ router.post(
         }
       }
 
+      // Admin-only fields
+      let adminFields = {};
+      if (req.user.role === "admin") {
+        const { priority, assignedDriver } = req.body;
+        if (priority) adminFields.priority = priority;
+        if (assignedDriver) {
+          adminFields.assignedDriver = assignedDriver;
+          // adminFields.status = "In Progress"; // User requested to keep it as Pending on dashboard
+        }
+      }
+
       const newReport = await Report.create({
         category,
         address,
@@ -172,6 +182,7 @@ router.post(
         photos: photoUrls, // save array of image URLs
         status: "Pending",
         user: req.user.id,
+        ...adminFields,
       });
 
       res.status(201).json({
@@ -241,13 +252,34 @@ router.get("/reports", authenticate, authenticateAdmin, async (req, res) => {
 // Get all users (Admin only)
 router.get("/all", authenticate, authenticateAdmin, async (req, res) => {
   try {
-    const users = await User.find().select("-password").sort({ createdAt: -1 });
+    const users = await User.find({ role: { $in: ["citizen", "admin"] } })
+      .select("-password")
+      .sort({ createdAt: -1 });
+    console.log(
+      "Returned users roles:",
+      users.map((u) => u.role)
+    );
     res.status(200).json({ success: true, users });
   } catch (error) {
     console.error("Error fetching users:", error);
     res
       .status(500)
       .json({ success: false, message: "Server error fetching users" });
+  }
+});
+
+//get drivers
+router.get("/drivers", authenticate, authenticateAdmin, async (req, res) => {
+  try {
+    const drivers = await User.find({ role: "driver" })
+      .select("-password")
+      .sort({ fullname: 1 });
+    res.json({ success: true, drivers });
+  } catch (error) {
+    console.error("Error fetching drivers:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error fetching drivers" });
   }
 });
 
@@ -294,6 +326,47 @@ router.patch(
       res
         .status(500)
         .json({ success: false, message: "Server error updating status" });
+    }
+  }
+);
+
+// Assign driver to report (Admin only)
+router.patch(
+  "/reports/:id/assign",
+  authenticate,
+  authenticateAdmin,
+  async (req, res) => {
+    try {
+      const { driverId } = req.body;
+      const { id } = req.params;
+
+      if (!driverId) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Driver ID is required" });
+      }
+
+      const report = await Report.findById(id);
+      if (!report) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Report not found" });
+      }
+
+      report.assignedDriver = driverId;
+      // Optionally update status to In Progress
+      if (report.status === "Pending") {
+        report.status = "In Progress";
+      }
+
+      await report.save();
+
+      res
+        .status(200)
+        .json({ success: true, message: "Driver assigned successfully" });
+    } catch (error) {
+      console.error("Error assigning driver:", error);
+      res.status(500).json({ success: false, message: "Server error" });
     }
   }
 );
