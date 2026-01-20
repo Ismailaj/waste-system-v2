@@ -29,11 +29,8 @@ app.use(express.json({
     try {
       JSON.parse(buf);
     } catch (e) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Invalid JSON format' 
-      });
-      throw new Error('Invalid JSON');
+      // Don't send response here, let the error handler deal with it
+      throw new Error('Invalid JSON format');
     }
   }
 }));
@@ -94,6 +91,11 @@ app.use('/api/*', (req, res) => {
 // Global error handler
 app.use((error, req, res, next) => {
   console.error('Global error handler:', error);
+  
+  // Check if response has already been sent
+  if (res.headersSent) {
+    return next(error);
+  }
   
   // Don't send error details in production
   const isDevelopment = process.env.NODE_ENV === 'development';

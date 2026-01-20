@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Authentication - CleanCity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Authentication Debug Tool</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Login Section -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Admin Login Test</h2>
+                <button id="loginBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Login as Admin
+                </button>
+                <div id="loginResult" class="mt-4 p-3 rounded hidden"></div>
+            </div>
+
+            <!-- Token Check Section -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Token Status</h2>
+                <button id="checkTokenBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Check Stored Tokens
+                </button>
+                <div id="tokenResult" class="mt-4 p-3 rounded hidden"></div>
+            </div>
+
+            <!-- API Test Section -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Analytics API Test</h2>
+                <button id="testApiBtn" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    Test Analytics Health
+                </button>
+                <div id="apiResult" class="mt-4 p-3 rounded hidden"></div>
+            </div>
+
+            <!-- Clear Storage Section -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Clear Storage</h2>
+                <button id="clearBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    Clear All Tokens
+                </button>
+                <div id="clearResult" class="mt-4 p-3 rounded hidden"></div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-8 text-center">
+            <a href="/pages/login.html" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-4">
+                Go to Login
+            </a>
+            <a href="/pages/admin-analytics.html" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Go to Analytics Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to show results
+        function showResult(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.className = `mt-4 p-3 rounded ${isSuccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+
+        // Login test
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@cleancity.com',
+                        password: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store tokens like the real login process
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminUser', JSON.stringify(data.user));
+                    showResult('loginResult', `Login successful! User: ${data.user.name} (${data.user.role})`);
+                } else {
+                    showResult('loginResult', `Login failed: ${data.message}`, false);
+                }
+            } catch (error) {
+                showResult('loginResult', `Login error: ${error.message}`, false);
+            }
+        });
+
+        // Token check
+        document.getElementById('checkTokenBtn').addEventListener('click', () => {
+            const adminToken = localStorage.getItem('adminToken');
+            const userToken = localStorage.getItem('userToken');
+            const token = localStorage.getItem('token');
+            const adminUser = localStorage.getItem('adminUser');
+            
+            const tokens = {
+                adminToken: adminToken ? 'Present' : 'Missing',
+                userToken: userToken ? 'Present' : 'Missing',
+                token: token ? 'Present' : 'Missing',
+                adminUser: adminUser ? JSON.parse(adminUser) : 'Missing'
+            };
+            
+            showResult('tokenResult', JSON.stringify(tokens, null, 2));
+        });
+
+        // API test
+        document.getElementById('testApiBtn').addEventListener('click', async () => {
+            try {
+                // Use same token retrieval logic as admin analytics
+                const token = localStorage.getItem('adminToken') || localStorage.getItem('userToken') || localStorage.getItem('token');
+                
+                if (!token) {
+                    showResult('apiResult', 'No token found! Please login first.', false);
+                    return;
+                }
+
+                const response = await fetch('/api/analytics/health', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('apiResult', `API test successful! Database: ${data.data.database}`);
+                } else {
+                    showResult('apiResult', `API test failed: ${data.message || 'Unknown error'}`, false);
+                }
+            } catch (error) {
+                showResult('apiResult', `API error: ${error.message}`, false);
+            }
+        });
+
+        // Clear storage
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('token');
+            localStorage.removeItem('adminUser');
+            localStorage.removeItem('user');
+            showResult('clearResult', 'All tokens cleared!');
+        });
+
+        // Auto-check tokens on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('checkTokenBtn').click();
+        });
+    </script>
+</body>
+</html>
