@@ -1,0 +1,7 @@
+# Services Directory
+
+This directory contains service classes for the CleanCity application:
+
+- `cacheService.js` - Redis caching service for analytics performance
+- `dataAggregation.js` - MongoDB aggregation pipelines for analytics
+- `exportService.js` - Data export functionality (CSV, PDF)

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - CleanCity Admin</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      // Wait for Tailwind to load before configuring
+      window.addEventListener('load', function() {
+        if (typeof tailwind !== 'undefined') {
+          tailwind.config = {
+            darkMode: "class",
+            theme: {
+              extend: {
+                colors: {
+                  primary: "#13ec37",
+                  "background-light": "#f6f8f6",
+                  "background-dark": "#102213",
+                },
+                fontFamily: {
+                  display: ["Public Sans", "sans-serif"],
+                },
+                borderRadius: {
+                  DEFAULT: "0.25rem",
+                  lg: "0.5rem",
+                  xl: "0.75rem",
+                  full: "9999px",
+                },
+              },
+            },
+          };
+        }
+      });
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+        .map-container {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        .driver-view-section {
+            display: block;
+        }
+        .driver-view-section.hidden {
+            display: none;
+        }
+        .performance-bar {
+            transition: width 0.3s ease-in-out;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111812] dark:text-gray-100 font-display">
+    <!-- Navigation Header -->
+    <nav class="bg-white dark:bg-[#1a2e1d] shadow-sm border-b border-[#dbe6dd] dark:border-[#2a402d]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex items-center gap-3 mr-6">
+                        <div
+                            class="bg-center bg-no-repeat bg-cover rounded-full size-8"
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBezEpioL4Ob6c7PzRKCBa5mf0iKPcumaedIDNCNZW-6tSnhlA4Sq-KzxfVM1dZ9qr6ftzRiqVZQpbQmQkysQsDhEZ_kBCvicuKC35lVbIiF2hc6-trN4p2InagtzyGEyWX7GSYb7MSs4W9lVosIh9ZPjJG7vX_k-LoGPf7CNgkxPaERMr504L3biwkvq8--Z5kTbiNyzvMc3OwmuAN24KoxxnM6IQsP9FjE_L97UhvHyCiPVAY0rNTjNRMPZqTM1BDCVzDOFLJxr0');"
+                        ></div>
+                        <h1 class="text-xl font-bold text-[#111812] dark:text-white">CleanCity Analytics</h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="refresh-data" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-[#233b26] hover:bg-gray-50 dark:hover:bg-[#2a402d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                        <span class="material-symbols-outlined mr-2">refresh</span>
+                        Refresh
+                    </button>
+                    <a href="admin.html" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-[#233b26] hover:bg-gray-50 dark:hover:bg-[#2a402d]">
+                        <span class="material-symbols-outlined mr-2">arrow_back</span>
+                        Back to Admin
+                    </a>
+                    <button id="logout-btn" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700">
+                        <span class="material-symbols-outlined mr-2">logout</span>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Filters Section -->
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-medium text-gray-900">Filters & Date Range</h2>
+            </div>
+            <div class="px-6 py-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Date Range -->
+                    <div>
+                        <label for="start-date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                        <input type="date" id="start-date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="end-date" class="block text-sm font-medium text-gray-700">End Date</label>
+                        <input type="date" id="end-date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    
+                    <!-- Category Filter -->
+                    <div>
+                        <label for="category-filter" class="block text-sm font-medium text-gray-700">Category</label>
+                        <select id="category-filter" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="all">All Categories</option>
+                            <option value="recyclable">Recyclable</option>
+                            <option value="illegal_dumping">Illegal Dumping</option>
+                            <option value="hazardous_waste">Hazardous Waste</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Status Filter -->
+                    <div>
+                        <label for="status-filter" class="block text-sm font-medium text-gray-700">Status</label>
+                        <select id="status-filter" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="all">All Statuses</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Assigned">Assigned</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex space-x-3">
+                    <button id="apply-filters" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <span class="material-symbols-outlined mr-2">filter_list</span>
+                        Apply Filters
+                    </button>
+                    <button id="clear-filters" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <span class="material-symbols-outlined mr-2">clear</span>
+                        Clear All
+                    </button>
+                    <button id="quick-7days" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Last 7 Days
+                    </button>
+                    <button id="quick-30days" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Last 30 Days
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+                    <button class="analytics-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm active" data-tab="trends">
+                        <span class="material-symbols-outlined mr-2">trending_up</span>
+                        Trends
+                    </button>
+                    <button class="analytics-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="geographic">
+                        <span class="material-symbols-outlined mr-2">map</span>
+                        Geographic
+                    </button>
+                    <button class="analytics-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="drivers">
+                        <span class="material-symbols-outlined mr-2">person</span>
+                        Drivers
+                    </button>
+                    <button class="analytics-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="status">
+                        <span class="material-symbols-outlined mr-2">assignment</span>
+                        Status
+                    </button>
+                    <button class="analytics-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="workflow">
+                        <span class="material-symbols-outlined mr-2">account_tree</span>
+                        Workflow
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="hidden">
+            <div class="bg-white shadow rounded-lg p-6 text-center">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-600 mt-2">Loading analytics data...</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="hidden bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <span class="material-symbols-outlined text-red-400">error</span>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Error Loading Data</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                        <p id="error-text">An error occurred while loading analytics data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Quality Indicator -->
+        <div id="data-quality" class="hidden bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <span class="material-symbols-outlined text-blue-400">info</span>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">Data Quality</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <p id="data-quality-text">Processing data quality information...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        
+        <!-- Trends Tab -->
+        <div id="trends-content" class="tab-content active">
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">Incident Trends Analysis</h3>
+                    <div class="flex space-x-2">
+                        <button id="export-trends-csv" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <span class="material-symbols-outlined mr-1">download</span>
+                            CSV
+                        </button>
+                        <button id="export-trends-pdf" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <span class="material-symbols-outlined mr-1">picture_as_pdf</span>
+                            PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <span class="material-symbols-outlined text-blue-600">trending_up</span>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-500">Total Incidents</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="trends-total">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <span class="material-symbols-outlined text-green-600">recycling</span>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-500">Recyclable</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="trends-recyclable">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <span class="material-symbols-outlined text-red-600">warning</span>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-500">Illegal Dumping</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="trends-illegal">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <span class="material-symbols-outlined text-orange-600">dangerous</span>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-500">Hazardous</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="trends-hazardous">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart -->
+                    <div class="chart-container">
+                        <canvas id="trends-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geographic Tab -->
+        <div id="geographic-content" class="tab-content">
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">Geographic Distribution</h3>
+                    <div class="flex space-x-2">
+                        <button id="export-geographic-csv" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <span class="material-symbols-outlined mr-1">download</span>
+                            CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <!-- Map -->
+                    <div id="geographic-map" class="map-container mb-6"></div>
+                    
+                    <!-- Location Summary -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Total Locations</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="geo-locations">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Geocoded Reports</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="geo-geocoded">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Average Density</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="geo-density">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drivers Tab -->
+        <div id="drivers-content" class="tab-content">
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">Driver Performance Analytics</h3>
+                    <div class="flex space-x-2">
+                        <select id="driver-period" class="border-gray-300 rounded-md shadow-sm text-sm">
+                            <option value="7d">Last 7 Days</option>
+                            <option value="30d" selected>Last 30 Days</option>
+                            <option value="90d">Last 90 Days</option>
+                        </select>
+                        <select id="driver-view" class="border-gray-300 rounded-md shadow-sm text-sm">
+                            <option value="overview" selected>Overview</option>
+                            <option value="ranking">Performance Ranking</option>
+                            <option value="efficiency">Efficiency Matrix</option>
+                        </select>
+                        <button id="export-drivers-csv" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <span class="material-symbols-outlined mr-1">download</span>
+                            CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <!-- Privacy Notice -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <span class="material-symbols-outlined text-blue-400">privacy_tip</span>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">Privacy Protection</h3>
+                                <div class="mt-2 text-sm text-blue-700">
+                                    <p>Driver performance data is anonymized and displays only performance metrics. No personal information is shown to protect driver privacy.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Averages -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Average Completion Rate</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="drivers-avg-completion">-</p>
+                            <p class="text-xs text-gray-600 mt-1" id="drivers-completion-trend">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Average Resolution Time</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="drivers-avg-time">-</p>
+                            <p class="text-xs text-gray-600 mt-1" id="drivers-time-trend">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Active Drivers</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="drivers-count">-</p>
+                            <p class="text-xs text-gray-600 mt-1" id="drivers-activity-trend">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">System Efficiency</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="drivers-efficiency">-</p>
+                            <p class="text-xs text-gray-600 mt-1" id="drivers-efficiency-trend">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Performance Overview -->
+                    <div id="driver-overview-section" class="driver-view-section">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <!-- Main Performance Chart -->
+                            <div class="chart-container">
+                                <canvas id="drivers-chart"></canvas>
+                            </div>
+                            
+                            <!-- Performance Distribution -->
+                            <div class="chart-container">
+                                <canvas id="drivers-distribution-chart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Performance Rankings Table -->
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-lg font-medium text-gray-900 mb-4">Top Performers (Privacy Protected)</h4>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver ID</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completion Rate</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Resolution Time</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Efficiency Score</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performance Trend</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="drivers-ranking-table" class="bg-white divide-y divide-gray-200">
+                                        <!-- Dynamic content will be inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Ranking Section -->
+                    <div id="driver-ranking-section" class="driver-view-section hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Radar Chart for Performance Metrics -->
+                            <div class="chart-container">
+                                <canvas id="drivers-radar-chart"></canvas>
+                            </div>
+                            
+                            <!-- Performance Comparison -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="text-lg font-medium text-gray-900 mb-4">Performance Benchmarks</h4>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-700">Completion Rate</span>
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                                <div id="completion-rate-bar" class="bg-green-600 h-2 rounded-full" style="width: 0%"></div>
+                                            </div>
+                                            <span id="completion-rate-value" class="text-sm font-semibold text-gray-900">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-700">Resolution Speed</span>
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                                <div id="resolution-speed-bar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                                            </div>
+                                            <span id="resolution-speed-value" class="text-sm font-semibold text-gray-900">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-700">Quality Score</span>
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                                <div id="quality-score-bar" class="bg-purple-600 h-2 rounded-full" style="width: 0%"></div>
+                                            </div>
+                                            <span id="quality-score-value" class="text-sm font-semibold text-gray-900">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-700">Consistency</span>
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                                <div id="consistency-bar" class="bg-orange-600 h-2 rounded-full" style="width: 0%"></div>
+                                            </div>
+                                            <span id="consistency-value" class="text-sm font-semibold text-gray-900">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Efficiency Matrix Section -->
+                    <div id="driver-efficiency-section" class="driver-view-section hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Efficiency Scatter Plot -->
+                            <div class="lg:col-span-2 chart-container">
+                                <canvas id="drivers-efficiency-chart"></canvas>
+                            </div>
+                            
+                            <!-- Efficiency Insights -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="text-lg font-medium text-gray-900 mb-4">Efficiency Insights</h4>
+                                <div class="space-y-4">
+                                    <div class="border-l-4 border-green-500 pl-4">
+                                        <h5 class="text-sm font-semibold text-green-800">High Performers</h5>
+                                        <p class="text-sm text-green-700" id="high-performers-count">- drivers</p>
+                                        <p class="text-xs text-green-600">Above average in both metrics</p>
+                                    </div>
+                                    <div class="border-l-4 border-yellow-500 pl-4">
+                                        <h5 class="text-sm font-semibold text-yellow-800">Developing</h5>
+                                        <p class="text-sm text-yellow-700" id="developing-performers-count">- drivers</p>
+                                        <p class="text-xs text-yellow-600">Room for improvement</p>
+                                    </div>
+                                    <div class="border-l-4 border-blue-500 pl-4">
+                                        <h5 class="text-sm font-semibold text-blue-800">Specialists</h5>
+                                        <p class="text-sm text-blue-700" id="specialist-performers-count">- drivers</p>
+                                        <p class="text-xs text-blue-600">Strong in specific areas</p>
+                                    </div>
+                                    <div class="border-l-4 border-red-500 pl-4">
+                                        <h5 class="text-sm font-semibold text-red-800">Needs Support</h5>
+                                        <p class="text-sm text-red-700" id="support-needed-count">- drivers</p>
+                                        <p class="text-xs text-red-600">May need additional training</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Tab -->
+        <div id="status-content" class="tab-content">
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">Status Distribution</h3>
+                    <div class="flex space-x-2">
+                        <button id="export-status-csv" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <span class="material-symbols-outlined mr-1">download</span>
+                            CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <!-- Status Summary -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Completion Rate</p>
+                            <p class="text-2xl font-semibold text-green-600" id="status-completion">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Rejection Rate</p>
+                            <p class="text-2xl font-semibold text-red-600" id="status-rejection">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">In Progress</p>
+                            <p class="text-2xl font-semibold text-orange-600" id="status-progress">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Avg Resolution Time</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="status-avg-time">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="chart-container">
+                            <canvas id="status-pie-chart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="status-bar-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Tab -->
+        <div id="workflow-content" class="tab-content">
+            <div class="bg-white shadow rounded-lg mb-6">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">Workflow Analytics</h3>
+                    <div class="flex space-x-2">
+                        <button id="export-workflow-csv" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <span class="material-symbols-outlined mr-1">download</span>
+                            CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <!-- Workflow Summary -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Workflow Efficiency</p>
+                            <p class="text-2xl font-semibold text-blue-600" id="workflow-efficiency">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Avg Duration</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="workflow-avg-duration">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Total Workflows</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="workflow-total">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-500">Bottlenecks</p>
+                            <p class="text-2xl font-semibold text-red-600" id="workflow-bottlenecks">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Transitions -->
+            <div class="bg-white shadow rounded-lg mb-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h4 class="text-lg font-medium text-gray-900">Status Transitions</h4>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="chart-container">
+                            <canvas id="workflow-transitions-chart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="status-time-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="workflow-paths-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow Timeline -->
+            <div class="bg-white shadow rounded-lg mb-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h4 class="text-lg font-medium text-gray-900">Workflow Timeline</h4>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="chart-container">
+                            <canvas id="workflow-timeline-chart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="workflow-efficiency-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottlenecks Analysis -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h4 class="text-lg font-medium text-gray-900">Workflow Bottlenecks</h4>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="chart-container">
+                            <canvas id="workflow-bottlenecks-chart"></canvas>
+                        </div>
+                        <div>
+                            <h5 class="text-md font-medium text-gray-900 mb-4">Identified Bottlenecks</h5>
+                            <div id="workflow-bottlenecks-list" class="space-y-3">
+                                <!-- Bottlenecks will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Last Updated Info -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+        <div class="text-center text-sm text-gray-500">
+            <p>Last updated: <span id="last-updated">Never</span></p>
+            <div class="flex justify-center items-center space-x-4 mt-2">
+                <span>Data quality: <span id="data-quality-score">-</span>%</span>
+                <span>Cache status: <span id="cache-status">Unknown</span></span>
+                <div id="performance-metrics" class="text-left">
+                    <!-- Performance metrics will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/analytics-filters.js"></script>
+    <script src="../js/analytics-viz.js"></script>
+    <script src="../js/admin-analytics.js"></script>
+</body>
+</html>

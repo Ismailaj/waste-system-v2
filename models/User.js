@@ -31,5 +31,13 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+<<<<<<< HEAD
+=======
+// Add index for role-based queries
+userSchema.index({ role: 1 });
+
+
+
+>>>>>>> pr-2
 const User = mongoose.model("User", userSchema);
 export default User;

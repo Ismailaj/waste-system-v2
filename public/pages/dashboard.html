@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Leaflet CSS and JS for map functionality -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <title>Dashboard</title>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f0f7ff; /* Very light blue background to match the screenshot */
+      }
+      .custom-shadow {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -2px rgba(0, 0, 0, 0.06);
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+  </head>
+  <body class="bg-gray-100">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+      <nav
+        class="fixed top-0 right-0 left-0 flex items-center justify-between bg-gray-800 h-16 px-4 sm:px-6 shadow-lg z-50"
+      >
+        <div
+          class="logo flex items-center gap-2 bg-gray-700 px-3 sm:px-4 py-2 rounded"
+        >
+          <!-- <img src="../assets/system-logo.png" alt="logo" class="w-8 h-8" /> -->
+<<<<<<< HEAD:public/dashboard.html
+          <a class="home-btn" href="index.html">
+=======
+          <a href="../index.html">
+>>>>>>> pr-2:public/pages/dashboard.html
+            <h2 class="font-bold text-gray-200 text-sm sm:text-base">
+              WasteResolve
+            </h2>
+          </a>
+        </div>
+
+        <ul
+          class="nav-links hidden sm:flex gap-4 sm:gap-8 flex-1 mx-auto justify-end mr-5"
+        >
+          <li>
+            <div class="relative cursor-pointer mt-1" onclick="toggleNotifications()">
+              <span class="material-symbols-outlined text-white text-2xl"
+                >notifications</span
+              >
+              <span
+                id="notification-badge"
+                class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden"
+              >
+                0
+              </span>
+              <!-- Notification Dropdown -->
+              <div
+                id="notification-dropdown"
+                class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl overflow-hidden hidden z-50 text-gray-800"
+              >
+                <div class="p-3 border-b text-sm font-bold text-gray-600">
+                  Notifications
+                </div>
+                <div id="notification-list" class="max-h-60 overflow-y-auto">
+                    <!-- Items injected here -->
+                    <p class="text-xs text-gray-500 p-4 text-center">No new notifications</p>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <a
+              href="dashboard.html"
+              class="text-white hover:text-amber-400 transition text-sm sm:text-base"
+              >Dashboard</a
+            >
+          </li>
+          <li>
+            <button
+              id="logout-button"
+              class="text-white hover:text-amber-400 transition text-sm sm:text-base"
+            >
+              Logout
+            </button>
+          </li>
+        </ul>
+
+        <img
+          src="../assets/avatar-collector.png"
+          alt="user_avatar"
+          class="w-8 h-8 rounded-full bg-gray-400"
+        />
+      </nav>
+
+      <div class="max-w-7xl mx-auto px-6 py-10">
+        <div class="md:flex justify-between items-start mt-6">
+          <div>
+            <h1 class="text-3xl font-bold">
+              Welcome, <span id="user-name">Citizen</span>!
+            </h1>
+            <p class="text-gray-600 mt-1">
+              Here is an overview of your reported waste incidents.
+            </p>
+          </div>
+
+          <a href="report.html" id="report-link">
+            <button
+              type="button"
+              class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            >
+              <span class="text-xl font-bold">+</span> Report New Waste Incident
+            </button>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8">
+          <div class="bg-white rounded-xl p-5 shadow">
+            <p class="text-gray-600">Total Reports</p>
+            <h3 class="text-2xl font-bold mt-1" id="total-reports-count">0</h3>
+          </div>
+
+          <div class="bg-white rounded-xl p-5 shadow">
+            <p class="text-gray-600">Resolved Incidents</p>
+            <h3 class="text-2xl font-bold mt-1" id="resolved-incidents-count">
+              0
+            </h3>
+          </div>
+
+          <div class="bg-white rounded-xl p-5 shadow">
+            <p class="text-gray-600">Currently In Progress</p>
+            <h3 class="text-2xl font-bold mt-1" id="in-progress-count">0</h3>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-10">
+          <div class="w-full lg:col-span-2 overflow-x-auto">
+            <div class="flex items-center min-w-[600px]">
+              <h2 class="font-bold text-xl mr-5">My Waste Reports</h2>
+              <div class="relative">
+                <select
+                  id="status-filter"
+                  class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+                <div
+                  class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
+                >
+                  <svg
+                    class="fill-current h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <table class="w-full text-left mt-6 min-w-[600px]">
+              <thead>
+                <tr class="border-b">
+                  <th class="py-2 text-gray-500">Report ID</th>
+                  <th class="py-2 text-gray-500">Waste Type</th>
+                  <th class="py-2 text-gray-500">Date Reported</th>
+                  <th class="py-2 text-gray-500">Status</th>
+                  <th class="py-2 text-gray-500">Notes</th>
+                  <th class="py-2 text-gray-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reports-table-body">
+                <tr class="border-b">
+                  <td class="py-3 px-4 font-medium">#8A24BC</td>
+                  <td class="px-4">Illegal Dumping</td>
+                  <td class="px-4">Oct 26, 2023</td>
+                  <td class="px-4">
+                    <span
+                      class="bg-green-200 text-green-700 text-sm px-3 py-1 rounded-full"
+                    >
+                      Resolved
+                    </span>
+                  </td>
+                </tr>
+
+                <tr class="border-b">
+                  <td class="py-3 px-4 font-medium">#9F1D5E</td>
+                  <td class="px-4">Overflowing Bin</td>
+                  <td class="px-4">Oct 22, 2023</td>
+                  <td class="px-4">
+                    <span
+                      class="bg-yellow-200 text-yellow-700 text-sm px-3 py-1 rounded-full"
+                    >
+                      In Progress
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="py-3 px-4 font-medium">#B3A81C</td>
+                  <td class="px-4">Broken Glass</td>
+                  <td class="px-4">Sep 15, 2023</td>
+                  <td class="px-4">
+                    <span
+                      class="bg-red-200 text-red-700 text-sm px-3 py-1 rounded-full"
+                    >
+                      Rejected
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="bg-white rounded-xl shadow p-4 h-[400px]">
+            <h2 class="text-lg font-bold mb-2">Did You Know?</h2>
+            <div
+              class="w-full h-[90%] rounded-lg border border-green-100 bg-green-50 flex flex-col items-center justify-center p-6 text-center"
+            >
+              <div class="bg-green-100 p-3 rounded-full mb-4">
+                <span class="material-symbols-outlined text-green-600 text-3xl"
+                  >lightbulb</span
+                >
+              </div>
+              <p id="eco-tip-content" class="text-gray-700 text-lg font-medium">
+                Loading tip...
+              </p>
+              <p class="text-sm text-green-600 mt-4 font-semibold">
+                Reduce • Reuse • Recycle
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report form modal (loaded dynamically) -->
+    <div
+      id="report-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center"
+    >
+      <div
+        id="report-modal-backdrop"
+        class="absolute inset-0 bg-black/50"
+      ></div>
+      <div
+        class="relative bg-white rounded-xl shadow-lg w-full max-w-3xl mx-4 overflow-auto max-h-[90vh] z-10"
+      >
+        <div class="flex justify-end p-3">
+          <button
+            id="report-modal-close"
+            class="text-2xl leading-none text-gray-600 hover:text-gray-900"
+          >
+            &times;
+          </button>
+        </div>
+        <div id="report-modal-content" class="p-6"></div>
+      </div>
+    </div>
+
+    <!-- Report Details Modal -->
+    <div
+      id="details-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center"
+    >
+      <div
+        id="details-modal-backdrop"
+        class="absolute inset-0 bg-black/60 transition-opacity"
+      ></div>
+      <div
+        class="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden z-10 animate-fade-in-up"
+      >
+        <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+          <h3 class="text-xl font-bold text-gray-800" id="details-title">
+            Report Details
+          </h3>
+          <button
+            id="details-modal-close"
+            class="text-gray-500 hover:text-gray-700 focus:outline-none"
+          >
+            <span class="material-symbols-outlined text-2xl">close</span>
+          </button>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[70vh]">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <img
+                id="details-image"
+                src=""
+                alt="Waste Report"
+                class="w-full h-64 object-cover rounded-lg shadow-md bg-gray-200"
+              />
+            </div>
+            <div class="space-y-4">
+              <div>
+                <p class="text-sm text-gray-500 uppercase font-semibold">
+                  Status
+                </p>
+                <span
+                  id="details-status"
+                  class="inline-block px-3 py-1 rounded-full text-sm font-medium mt-1"
+                ></span>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 uppercase font-semibold">
+                  Category
+                </p>
+                <p id="details-category" class="text-lg font-medium capitalize">
+                  -
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 uppercase font-semibold">
+                  Date Reported
+                </p>
+                <p id="details-date" class="text-gray-800">-</p>
+              </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-6">
+            <p class="text-sm text-gray-500 uppercase font-semibold">
+              Description
+            </p>
+            <p
+              id="details-description"
+              class="text-gray-700 mt-2 bg-gray-50 p-4 rounded-lg border border-gray-100"
+            >
+              -
+            </p>
+          </div>
+          <div id="details-feedback-section" class="mt-6 hidden">
+            <p
+              class="text-sm text-gray-500 uppercase font-semibold"
+            >
+              Rejection Reason
+            </p>
+            <p
+              id="details-feedback"
+              class="text-red-700 mt-2 bg-red-50 p-4 rounded-lg border border-red-100"
+            >
+              -
+            </p>
+          </div>
+        </div>
+        <div class="p-4 border-t bg-gray-50 flex justify-end">
+          <button
+            id="details-modal-close-btn"
+            class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const link = document.getElementById("report-link");
+        const modal = document.getElementById("report-modal");
+        const backdrop = document.getElementById("report-modal-backdrop");
+        const closeBtn = document.getElementById("report-modal-close");
+        const content = document.getElementById("report-modal-content");
+
+        async function openModal(e) {
+          e.preventDefault();
+          try {
+            const res = await fetch("report.html");
+            const text = await res.text();
+            const formMatch = text.match(/<form[\s\S]*?<\/form>/i);
+            const html = formMatch ? formMatch[0] : text;
+            content.innerHTML = html;
+            // load report.js to attach form handlers
+            const script = document.createElement("script");
+            script.src = "../js/report.js";
+            script.defer = true;
+            content.appendChild(script);
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            const firstInput = content.querySelector(
+              "input, textarea, select, button"
+            );
+            if (firstInput) firstInput.focus();
+          } catch (err) {
+            console.error("Could not load report form:", err);
+            alert("Could not load report form. Check console.");
+          }
+        }
+
+        function closeModal() {
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+          content.innerHTML = "";
+        }
+
+        link && link.addEventListener("click", openModal);
+        closeBtn && closeBtn.addEventListener("click", closeModal);
+        backdrop && backdrop.addEventListener("click", closeModal);
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && !modal.classList.contains("hidden"))
+            closeModal();
+        });
+      })();
+    </script>
+  </body>
+
+  <script src="../js/dashboard.js"></script>
+  <!-- <script src="../js/report.js"></script> -->
+</html>
