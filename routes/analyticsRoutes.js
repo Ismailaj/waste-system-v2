@@ -337,8 +337,8 @@ router.get('/trends/comparison', async (req, res) => {
 
     // Calculate percentage changes
     const comparison = await analyticsEngine.calculatePercentageChanges(
-      period1Data.dailyData || [],
-      period2Data.dailyData || []
+      period1Data.dailyTrends || [],
+      period2Data.dailyTrends || []
     );
 
     res.json({
