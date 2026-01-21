@@ -2,7 +2,6 @@ const form = document.getElementById("report-form");
 
 // Check for admin role and show fields
 document.addEventListener("DOMContentLoaded", async () => {
-  // Check if admin is logged in
   const adminToken = localStorage.getItem("adminToken");
   const adminUser = localStorage.getItem("adminUser");
 

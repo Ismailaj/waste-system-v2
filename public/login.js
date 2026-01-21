@@ -15,17 +15,10 @@ form.addEventListener("submit", async (e) => {
 
     const data = await response.json();
     if (response.ok && data.success) {
-      // Clear previous session data to prevent pollution/mix-ups
-      // localStorage.removeItem("token");
-      // localStorage.removeItem("userToken");
       localStorage.removeItem("adminToken");
       // localStorage.removeItem("user");
       localStorage.removeItem("adminUser");
 
-      // 1. SAVE the token: This stores the "ID card" in the browser so other pages can see it.
-      // Check role and redirect accordingly
-      // 1. SAVE the token: This stores the "ID card" in the browser so other pages can see it.
-      // Check role and redirect accordingly
       if (data.user.role === "admin") {
         localStorage.setItem("adminToken", data.token);
         localStorage.setItem("adminUser", JSON.stringify(data.user));
@@ -37,8 +30,6 @@ form.addEventListener("submit", async (e) => {
       } else {
         localStorage.setItem("userToken", data.token);
         localStorage.setItem("citizenUser", JSON.stringify(data.user));
-        // We also keep 'user' for now if other legacy scripts need it, or we simply update dashboard.js to use citizenUser
-        // Let's use specific keys to be clean.
         window.location.href = "dashboard.html";
       }
       messageElement.textContent = "Login successful: " + data?.message;

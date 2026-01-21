@@ -11,6 +11,28 @@ import fs from "fs";
 const router = express.Router();
 
 // registering new user. Signup page
+router.get("/public-stats", async (req, res) => {
+  try {
+    const totalReports = await Report.countDocuments();
+    const completedPickups = await Report.countDocuments({
+      status: { $in: ["Completed", "Resolved"] },
+    });
+    const activeMembers = await User.countDocuments();
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        totalReports,
+        completedPickups,
+        activeMembers,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching public stats:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 router.post("/signup", async (req, res) => {
   try {
     const { fullname, email, password, role } = req.body;
