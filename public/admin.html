@@ -251,6 +251,31 @@
                 </div>
               </div>
             </div>
+            
+            <!-- Pending Drivers Section -->
+             <div
+                id="pending-drivers-section"
+                class="rounded-xl border border-[#dbe6dd] dark:border-[#2a402d] bg-white dark:bg-[#1a2e1d] shadow-sm flex flex-col hidden"
+              >
+                <div
+                  class="px-5 py-3 border-b border-[#dbe6dd] dark:border-[#2a402d] flex justify-between items-center bg-gray-50 dark:bg-[#233b26]/30"
+                >
+                  <h3
+                    class="font-bold text-[#111812] dark:text-white text-base"
+                  >
+                    Pending Driver Approvals
+                  </h3>
+                </div>
+                <div
+                  id="pending-drivers-list"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4"
+                >
+                  <!-- Pending drivers will be injected here -->
+                  <div class="col-span-full text-center py-4 text-gray-500">
+                    No pending approvals.
+                  </div>
+                </div>
+              </div>
           </div>
         </div>
       </main>
@@ -299,6 +324,39 @@
         </div>
       </div>
     </div>
+
+    <!-- License View Modal -->
+    <div
+      id="licenseModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
+    >
+      <div class="relative bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col">
+          <div class="flex justify-between items-center p-4 border-b">
+              <h3 class="text-lg font-bold">Driver License</h3>
+              <button id="closeLicenseModalBtn" class="text-gray-500 hover:text-gray-700">
+                  <span class="material-symbols-outlined">close</span>
+              </button>
+          </div>
+          <div class="p-4 flex-1 overflow-auto flex items-center justify-center bg-gray-100">
+              <img id="licenseImage" src="" alt="Driver License" class="max-w-full max-h-full object-contain rounded shadow" />
+          </div>
+      </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div id="successModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm flex flex-col items-center">
+            <div class="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-4xl text-green-600">check</span>
+            </div>
+            <h2 class="text-xl font-bold mb-2 text-center text-gray-900">Success!</h2>
+            <p id="successModalMessage" class="text-gray-600 text-center mb-6">Action completed successfully.</p>
+            <button id="closeSuccessModalBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                OK
+            </button>
+        </div>
+    </div>
+
     <script src="admin.js"></script>
   </body>
 </html>

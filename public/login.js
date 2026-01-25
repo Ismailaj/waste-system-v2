@@ -1,4 +1,5 @@
 const form = document.getElementById("loginform");
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -28,9 +29,11 @@ form.addEventListener("submit", async (e) => {
         localStorage.setItem("driverUser", JSON.stringify(data.user)); // Distinct key
         window.location.href = "driver.html";
       } else {
+        console.log("Saving citizen data to localStorage...");
         localStorage.setItem("userToken", data.token);
-        localStorage.setItem("citizenUser", JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
         window.location.href = "dashboard.html";
+
       }
       messageElement.textContent = "Login successful: " + data?.message;
       console.log("Login successful:" + data?.message);

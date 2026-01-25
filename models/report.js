@@ -27,9 +27,6 @@ const reportSchema = new mongoose.Schema(
       enum: ["Low", "Medium", "High", "Critical"],
       default: "Medium",
     },
-    // internalNotes: {
-    //   type: String,
-    // },
   },
   {
     timestamps: true,

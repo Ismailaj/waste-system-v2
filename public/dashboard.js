@@ -3,11 +3,26 @@ let allReports = [];
 
 async function loadDashboard() {
   const token = localStorage.getItem("userToken"); // 1. Retrieves your "ID card" from login.
-  const user = JSON.parse(localStorage.getItem("citizenUser")); // Retrieve the saved user object.
+  const user = JSON.parse(localStorage.getItem("user")); // Retrieve the saved user object.
 
   if (!token) {
     window.location.href = "login.html"; // 2. No token? Redirect to login.
     return;
+  }
+
+  // Logout Button Listener already handled globally or needs specific checking
+  // We will rely on the global one if present, or add checks
+  const localLogoutBtn = document.getElementById("logout-button");
+  if (localLogoutBtn) {
+      // Remove old listeners by cloning or just assume fresh page load
+      localLogoutBtn.replaceWith(localLogoutBtn.cloneNode(true));
+      document.getElementById("logout-button").addEventListener("click", () => {
+        if (confirm("Are you sure you want to logout?")) {
+            localStorage.removeItem("userToken");
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+      });
   }
 
   // 4. Update the Welcome Name from the token data (if saved)
@@ -15,7 +30,12 @@ async function loadDashboard() {
     document.getElementById("user-name").innerText = user.fullname;
   }
 
+  // Show loading state
+  const tableBody = document.getElementById("reports-table-body");
+  if (tableBody) tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500">Loading reports...</td></tr>`;
+
   try {
+    // console.log("Fetching dashboard data with token:", token);
     const response = await fetch("http://localhost:5050/api/users/dashboard", {
       method: "GET",
       headers: {
@@ -23,10 +43,13 @@ async function loadDashboard() {
       },
     });
 
+    console.log("Dashboard response status:", response.status);
     const data = await response.json();
+    console.log("Dashboard data:", data);
 
     // 5. Update Stat Counters
     if (data.success) {
+      console.log("Updating stats and table...");
       document.getElementById("total-reports-count").innerText =
         `${data.stats.totalReports}`;
       document.getElementById("resolved-incidents-count").innerText =
@@ -45,9 +68,13 @@ async function loadDashboard() {
 
       // 7. Render Eco Tip
       displayRandomTip();
+    } else {
+        console.error("Dashboard API returned success: false", data.message);
+        if (tableBody) tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-red-500">Error: ${data.message}</td></tr>`;
     }
   } catch (error) {
     console.error("Dashboard error:", error);
+    if (tableBody) tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-red-500">Failed to load reports. View console for details.</td></tr>`;
   }
 }
 

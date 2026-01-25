@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!token || user.role !== "admin") {
     // Redirect non-admins to login
+    
     window.location.href = "login.html";
     return;
   }
@@ -90,12 +91,20 @@ async function loadDashboard() {
   const headerTitle = document.querySelector("header h2");
   if (headerTitle) headerTitle.innerText = "Dashboard Overview";
 
+  // Hide pending section
+  const pendingSection = document.getElementById("pending-drivers-section");
+  if (pendingSection) pendingSection.classList.add("hidden");
+
   await fetchReports();
 }
 
 async function fetchUsers() {
   const token = localStorage.getItem("adminToken");
   const grid = document.getElementById("reports-grid");
+  
+  // Hide pending section
+  const pendingSection = document.getElementById("pending-drivers-section");
+  if (pendingSection) pendingSection.classList.add("hidden");
 
   // Update section title
   const sectionTitle = document.querySelector(".font-bold.text-base");
@@ -108,7 +117,7 @@ async function fetchUsers() {
   grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500">Loading users...</div>`;
 
   try {
-    const response = await fetch("http://localhost:5050/api/users/all", {
+    const response = await fetch("http://localhost:5050/api/admin/users/all", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -189,19 +198,26 @@ function renderUsers(users) {
 async function fetchAndRenderDrivers() {
   const token = localStorage.getItem("adminToken");
   const grid = document.getElementById("reports-grid");
+  const pendingSection = document.getElementById("pending-drivers-section");
 
-  // Update section title
+  // Show pending section
+  if (pendingSection) pendingSection.classList.remove("hidden");
+
+  // Update section title for main grid
   const sectionTitle = document.querySelector(".font-bold.text-base");
-  if (sectionTitle) sectionTitle.innerText = "Driver Management";
+  if (sectionTitle) sectionTitle.innerText = "All Drivers";
 
   // Update header title
   const headerTitle = document.querySelector("header h2");
-  if (headerTitle) headerTitle.innerText = "Drivers";
+  if (headerTitle) headerTitle.innerText = "Drivers Management";
+
+  // Load Pending Drivers
+  fetchPendingDrivers();
 
   grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500">Loading drivers...</div>`;
 
   try {
-    const response = await fetch("http://localhost:5050/api/users/drivers", {
+    const response = await fetch("http://localhost:5050/api/admin/users/drivers", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -220,6 +236,70 @@ async function fetchAndRenderDrivers() {
     grid.innerHTML = `<div class="col-span-full text-center text-red-500">Failed to load drivers</div>`;
   }
 }
+
+async function fetchPendingDrivers() {
+    const token = localStorage.getItem("adminToken");
+    const container = document.getElementById("pending-drivers-list");
+    container.innerHTML = `<div class="col-span-full text-center text-gray-500">Loading pending approvals...</div>`;
+
+    try {
+        const response = await fetch("http://localhost:5050/api/admin/drivers/pending", {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            renderPendingDrivers(data.drivers);
+        } else {
+            container.innerHTML = `<div class="col-span-full text-center text-red-500">Error loading pending drivers</div>`;
+        }
+    } catch (error) {
+        console.error("Error fetching pending drivers:", error);
+        container.innerHTML = `<div class="col-span-full text-center text-red-500">Failed to load pending drivers</div>`;
+    }
+}
+
+function renderPendingDrivers(drivers) {
+    const container = document.getElementById("pending-drivers-list");
+    container.innerHTML = "";
+
+    if (drivers.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-4 text-gray-500">No pending approvals.</div>`;
+        return;
+    }
+
+    drivers.forEach(driver => {
+        const card = document.createElement("div");
+        card.className = "flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-50 dark:bg-[#233b26]/20 rounded-lg border border-[#dbe6dd] dark:border-[#2a402d]";
+        
+        const licenseBtn = driver.licenseUrl 
+            ? `<button onclick="openLicenseModal('${driver.licenseUrl}')" class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium flex items-center gap-1"><span class="material-symbols-outlined text-base">visibility</span> View License</button>` 
+            : `<span class="text-gray-400 text-sm italic">No license uploaded</span>`;
+
+        card.innerHTML = `
+            <div class="flex items-center gap-3 mb-3 sm:mb-0">
+                <div class="size-10 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center font-bold">
+                    ${driver.fullname.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                    <h4 class="font-bold text-[#111812] dark:text-white">${driver.fullname}</h4>
+                    <p class="text-xs text-gray-500">${driver.email}</p>
+                    <div class="mt-1">${licenseBtn}</div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="verifyDriver('${driver._id}', 'approve')" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">check</span> Approve
+                </button>
+                <button onclick="verifyDriver('${driver._id}', 'reject')" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">close</span> Reject
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
 function renderDrivers(drivers) {
   const grid = document.getElementById("reports-grid");
   grid.innerHTML = "";
@@ -280,7 +360,7 @@ async function fetchReports() {
   const grid = document.getElementById("reports-grid");
 
   try {
-    const response = await fetch("http://localhost:5050/api/users/reports", {
+    const response = await fetch("http://localhost:5050/api/admin/reports", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -431,7 +511,7 @@ window.updateStatus = async (id, status) => {
 
   try {
     const response = await fetch(
-      `http://localhost:5050/api/users/reports/${id}/status`,
+      `http://localhost:5050/api/admin/reports/${id}/status`,
       {
         method: "PATCH",
         headers: {
@@ -455,6 +535,36 @@ window.updateStatus = async (id, status) => {
   }
 };
 
+window.verifyDriver = async (id, action) => {
+    const token = localStorage.getItem("adminToken");
+    if (!confirm(`Are you sure you want to ${action} this driver application?`)) return;
+
+    try {
+        const response = await fetch(`http://localhost:5050/api/admin/drivers/${id}/verify`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ action })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            alert(data.message);
+            // Refresh list
+            fetchPendingDrivers();
+            // Also refresh main list as they might move there
+            fetchAndRenderDrivers();
+        } else {
+            alert("Action failed: " + data.message);
+        }
+    } catch (error) {
+        console.error("Error verifying driver:", error);
+        alert("Server connection error");
+    }
+};
+
 // Driver Assignment Logic
 let currentReportIdToAssign = null;
 let driversList = [];
@@ -462,7 +572,8 @@ let driversList = [];
 async function fetchDriversForSelect() {
   const token = localStorage.getItem("adminToken");
   try {
-    const response = await fetch("http://localhost:5050/api/users/drivers", {
+    // Use the available drivers endpoint
+    const response = await fetch("http://localhost:5050/api/admin/drivers/available", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await response.json();
@@ -494,8 +605,39 @@ window.openAssignModal = (reportId) => {
   if (driversList.length === 0) fetchDriversForSelect();
 };
 
+window.openLicenseModal = (imageUrl) => {
+  const modal = document.getElementById("licenseModal");
+  const img = document.getElementById("licenseImage");
+  if (modal && img) {
+    img.src = imageUrl;
+    modal.classList.remove("hidden");
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   // ... existing listeners ...
+  
+  // License Modal Logic
+  const closeLicenseBtn = document.getElementById("closeLicenseModalBtn");
+  const licenseModal = document.getElementById("licenseModal");
+
+  if (closeLicenseBtn && licenseModal) {
+    closeLicenseBtn.addEventListener("click", () => {
+      licenseModal.classList.add("hidden");
+      const img = document.getElementById("licenseImage");
+      if (img) img.src = "";
+    });
+    
+    // Close on background click
+    licenseModal.addEventListener("click", (e) => {
+       if (e.target === licenseModal) {
+          licenseModal.classList.add("hidden");
+          const img = document.getElementById("licenseImage");
+          if (img) img.src = "";
+       }
+    });
+  }
+
   const closeAssignBtn = document.getElementById("closeAssignModalBtn");
   const confirmAssignBtn = document.getElementById("confirmAssignBtn");
   const modal = document.getElementById("assignModal");
@@ -505,6 +647,18 @@ document.addEventListener("DOMContentLoaded", () => {
       modal.classList.add("hidden");
       currentReportIdToAssign = null;
     });
+  }
+
+  // Success Modal Logic
+  const successModal = document.getElementById("successModal");
+  const closeSuccessBtn = document.getElementById("closeSuccessModalBtn");
+
+  if (closeSuccessBtn && successModal) {
+      closeSuccessBtn.addEventListener("click", () => {
+          successModal.classList.add("hidden");
+          // Refresh dashboard only after acknowledging success
+          fetchReports(); 
+      });
   }
 
   if (confirmAssignBtn) {
@@ -517,7 +671,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const token = localStorage.getItem("adminToken");
       try {
         const response = await fetch(
-          `http://localhost:5050/api/users/reports/${currentReportIdToAssign}/assign`,
+          `http://localhost:5050/api/admin/reports/${currentReportIdToAssign}/assign`,
           {
             method: "PATCH",
             headers: {
@@ -529,9 +683,13 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         const data = await response.json();
         if (data.success) {
-          modal.classList.add("hidden");
-          fetchReports(); // refresh
-          alert("Driver assigned successfully");
+          modal.classList.add("hidden"); // Close assign modal
+          
+          // Show Success Modal
+          const msg = document.getElementById("successModalMessage");
+          if(msg) msg.textContent = "Driver assigned successfully!";
+          if(successModal) successModal.classList.remove("hidden");
+          
         } else {
           alert(data.message || "Assignment failed");
         }

@@ -1,8 +1,12 @@
 import express from "express";
-import { authenticate, authenticateDriver } from "../middleware/auth.js";
+import { authenticate, authenticateDriver, authenticateAdmin } from "../middleware/auth.js";
 import Report from "../models/report.js";
+import User from "../models/User.js";
 
 const router = express.Router();
+
+// ADMIN ROUTES FOR DRIVER VERIFICATION
+// Moved to adminRoutes.js
 
 // GET /api/driver/assigned - Get reports assigned to the logged-in driver
 router.get("/assigned", authenticate, authenticateDriver, async (req, res) => {

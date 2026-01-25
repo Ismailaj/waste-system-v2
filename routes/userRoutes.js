@@ -7,6 +7,7 @@ import { authenticate, authenticateAdmin } from "../middleware/auth.js";
 import upload from "../config/multer.js";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -33,7 +34,8 @@ router.get("/public-stats", async (req, res) => {
   }
 });
 
-router.post("/signup", async (req, res) => {
+// registering new user. Signup page
+router.post("/signup", upload.single("license"), async (req, res) => {
   try {
     const { fullname, email, password, role } = req.body;
     console.log("Signup Request:", req.body); // Debug log
@@ -50,6 +52,28 @@ router.post("/signup", async (req, res) => {
         .json({ success: false, message: "Email already registered" });
     }
 
+    let licenseUrl = "";
+    let isVerified = true; // Default to true for non-drivers
+
+    if (role === "driver") {
+      isVerified = false; // Drivers need verification
+      if (req.file) {
+        try {
+          const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "driver_licenses",
+          });
+          licenseUrl = result.secure_url;
+          fs.unlinkSync(req.file.path); // Delete local file
+        } catch (uploadError) {
+          console.error("License upload error:", uploadError);
+          return res.status(500).json({ success: false, message: "Error uploading license" });
+        }
+      } else {
+        // Assume license is mandatory for drivers
+         return res.status(400).json({ success: false, message: "Driver license is required" });
+      }
+    }
+
     //encrypt passsword or hash
     const encryptedPassword = await bcrypt.hash(password, 10);
 
@@ -59,6 +83,8 @@ router.post("/signup", async (req, res) => {
       email,
       password: encryptedPassword,
       role: role || "citizen",
+      licenseUrl,
+      isVerified,
     });
 
     const user = newUser.toObject();
@@ -66,7 +92,7 @@ router.post("/signup", async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: role === 'driver' ? "Driver registered successfully. Please wait for admin verification." : "User registered successfully",
       // user: newUser
       user,
     });
@@ -109,6 +135,14 @@ router.post("/login", async (req, res) => {
         success: false,
         message: "Invalid password. Input correct password",
       });
+    }
+
+    // Check if user is a driver and is verified
+    if (user.role === 'driver' && !user.isVerified) {
+        return res.status(403).json({
+            success: false,
+            message: "Account pending verification. Please wait for admin approval.",
+        });
     }
 
     const token = jwt.sign(
@@ -223,10 +257,18 @@ router.get("/dashboard", authenticate, async (req, res) => {
   try {
     // 1. Gets the logged-in user's ID from the token (via middleware).
     const userId = req.user.id;
+    console.log("Server Dashboard Request for UserID:", userId);
 
     // 2. Finds all reports in MongoDB where the 'user' field matches this ID.
     // .sort({ createdAt: -1 }) puts the newest reports at the top of the list.
-    const reports = await Report.find({ user: userId }).sort({ createdAt: -1 });
+    
+    // Safety check: Ensure userId is valid
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+       console.error("Dashboard Error: Invalid User ID:", userId);
+       return res.status(400).json({ success: false, message: "Invalid User ID" });
+    }
+
+    const reports = await Report.find({ user: new mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 });
 
     // 3. Calculates 'Total Reports' by getting the length of the reports array.
     const totalReports = reports.length;
@@ -242,6 +284,8 @@ router.get("/dashboard", authenticate, async (req, res) => {
     ).length;
 
     // 6. Sends all the stats and the full list of reports back to the frontend.
+    res.set('Cache-Control', 'no-store'); // Prevent caching
+    
     res.status(200).json({
       success: true,
       stats: { totalReports, resolvedIncidents, inProgress },
@@ -256,141 +300,7 @@ router.get("/dashboard", authenticate, async (req, res) => {
 
 // ADMIN ROUTES
 // Get all reports (Admin only)
-router.get("/reports", authenticate, authenticateAdmin, async (req, res) => {
-  try {
-    const reports = await Report.find()
-      .populate("user", "fullname email") // Includes reporter details
-      .sort({ createdAt: -1 });
-
-    res.status(200).json({ success: true, reports });
-  } catch (error) {
-    console.error("Error fetching all reports:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Server error fetching reports" });
-  }
-});
-
-// Get all users (Admin only)
-router.get("/all", authenticate, authenticateAdmin, async (req, res) => {
-  try {
-    const users = await User.find({ role: { $in: ["citizen", "admin"] } })
-      .select("-password")
-      .sort({ createdAt: -1 });
-    console.log(
-      "Returned users roles:",
-      users.map((u) => u.role)
-    );
-    res.status(200).json({ success: true, users });
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Server error fetching users" });
-  }
-});
-
-//get drivers
-router.get("/drivers", authenticate, authenticateAdmin, async (req, res) => {
-  try {
-    const drivers = await User.find({ role: "driver" })
-      .select("-password")
-      .sort({ fullname: 1 });
-    res.json({ success: true, drivers });
-  } catch (error) {
-    console.error("Error fetching drivers:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Server error fetching drivers" });
-  }
-});
-
-// Update report status (Admin only)
-router.patch(
-  "/reports/:id/status",
-  authenticate,
-  authenticateAdmin,
-  async (req, res) => {
-    try {
-      const { status } = req.body;
-      const { id } = req.params;
-
-      const validStatuses = [
-        "Pending",
-        "In Progress",
-        "Completed",
-        "Resolved",
-        "Rejected",
-      ];
-      if (!validStatuses.includes(status)) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid status" });
-      }
-
-      const report = await Report.findByIdAndUpdate(
-        id,
-        { status },
-        { new: true }
-      );
-
-      if (!report) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Report not found" });
-      }
-
-      res
-        .status(200)
-        .json({ success: true, message: "Status updated", report });
-    } catch (error) {
-      console.error("Error updating status:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Server error updating status" });
-    }
-  }
-);
-
-// Assign driver to report (Admin only)
-router.patch(
-  "/reports/:id/assign",
-  authenticate,
-  authenticateAdmin,
-  async (req, res) => {
-    try {
-      const { driverId } = req.body;
-      const { id } = req.params;
-
-      if (!driverId) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Driver ID is required" });
-      }
-
-      const report = await Report.findById(id);
-      if (!report) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Report not found" });
-      }
-
-      report.assignedDriver = driverId;
-      // Optionally update status to In Progress
-      if (report.status === "Pending") {
-        report.status = "In Progress";
-      }
-
-      await report.save();
-
-      res
-        .status(200)
-        .json({ success: true, message: "Driver assigned successfully" });
-    } catch (error) {
-      console.error("Error assigning driver:", error);
-      res.status(500).json({ success: false, message: "Server error" });
-    }
-  }
-);
+// End of user routes
+// Admin routes moved to adminRoutes.js
 
 export default router;

@@ -24,6 +24,15 @@ const userSchema = new mongoose.Schema(
       enum: ["citizen", "admin", "driver"],
       default: "citizen",
     },
+
+    licenseUrl: {
+      type: String, // URL from cloudinary
+    },
+
+    isVerified: {
+      type: Boolean,
+      default: false, // Default to false for everyone, but only matters for drivers
+    },
   },
 
   {

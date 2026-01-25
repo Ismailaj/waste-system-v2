@@ -27,8 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
   driverNameSpan.textContent = user.fullname;
 
   logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("driverToken");
+    localStorage.removeItem("driverUser");
     window.location.href = "login.html";
   });
 

@@ -5,6 +5,7 @@ import connectDB from "./config/db.js"; //my connectDB function
 import router from "./routes/userRoutes.js";
 
 import driverRoutes from "./routes/driverRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config(); //load/process credentials from my .env file
 const app = express(); //initialize express
@@ -27,6 +28,7 @@ connectDB().catch((err) => {
 //activate Route
 app.use("/api/users", router);
 app.use("/api/driver", driverRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.json("System running successfully");
