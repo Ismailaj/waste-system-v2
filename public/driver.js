@@ -17,14 +17,104 @@ document.addEventListener("DOMContentLoaded", () => {
   const markCompletedBtn = document.getElementById("markCompletedBtn");
   const confirmRejectBtn = document.getElementById("confirmRejectBtn");
   const rejectionReasonSelect = document.getElementById(
-    "rejectionReasonSelect"
+    "rejectionReasonSelect",
   );
   const rejectError = document.getElementById("rejectError");
   const closeModalBtn = document.getElementById("closeModalBtn");
 
   let currentReportId = null;
 
+  // Map variables
+  let map = null;
+  let markers = {}; // Store markers by report ID for easy removal
+
   driverNameSpan.textContent = user.fullname;
+
+  // Initialize map
+  function initMap() {
+    if (!map) {
+      map = L.map("map").setView([12.0022, 8.5919], 12); // Default to Kano, Nigeria, will auto-fit to markers
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+      }).addTo(map);
+    }
+  }
+
+  // Add marker for a report
+  function addMarker(report) {
+    console.log("Attempting to add marker for report:", report._id);
+    console.log("Report location data:", report.location);
+
+    if (
+      !report.location ||
+      !report.location.latitude ||
+      !report.location.longitude
+    ) {
+      console.warn("Skipping report - no location data:", report._id);
+      return; // Skip reports without location
+    }
+
+    console.log(
+      `Adding marker at: Lat ${report.location.latitude}, Lng ${report.location.longitude}`,
+    );
+
+    // Custom marker icon (green for active pickups)
+    const customIcon = L.icon({
+      iconUrl: "assets/map-marker.png",
+      shadowUrl: "assets/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41],
+    });
+
+    const marker = L.marker(
+      [report.location.latitude, report.location.longitude],
+      { icon: customIcon },
+    )
+      .bindPopup(
+        `
+        <div style="min-width: 200px;">
+          <h3 style="font-weight: bold; margin-bottom: 8px; color: #16a34a;">${report.category}</h3>
+          <p style="margin-bottom: 4px;"><strong>Address:</strong> ${report.address}</p>
+          ${
+            report.description
+              ? `<p style="margin-bottom: 4px;"><strong>Description:</strong> ${report.description}</p>`
+              : ""
+          }
+          <p style="margin-top: 8px; font-size: 12px; color: #666;">
+            <strong>Status:</strong> <span style="color: #2563eb;">${report.status}</span>
+          </p>
+          <p style="margin-top: 4px; font-size: 10px; color: #999;">
+            <strong>Coordinates:</strong> ${report.location.latitude.toFixed(6)}, ${report.location.longitude.toFixed(6)}
+          </p>
+        </div>
+      `,
+      )
+      .addTo(map);
+
+    markers[report._id] = marker;
+    console.log("✅ Marker added successfully for report:", report._id);
+  }
+
+  // Remove marker from map
+  function removeMarker(reportId) {
+    if (markers[reportId]) {
+      map.removeLayer(markers[reportId]);
+      delete markers[reportId];
+    }
+  }
+
+  // Fit map bounds to show all markers
+  function fitMapToMarkers() {
+    const markerArray = Object.values(markers);
+    if (markerArray.length > 0) {
+      const group = L.featureGroup(markerArray);
+      map.fitBounds(group.getBounds().pad(0.1));
+    }
+  }
 
   logoutBtn.addEventListener("click", () => {
     localStorage.removeItem("driverToken");
@@ -72,11 +162,17 @@ document.addEventListener("DOMContentLoaded", () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       const reports = await response.json();
 
+      console.log("📋 Fetched assigned reports:", reports.length);
+      console.log("Reports data:", reports);
+
       reportsContainer.innerHTML = "";
+
+      // Clear existing markers
+      Object.keys(markers).forEach((id) => removeMarker(id));
 
       if (reports.length === 0) {
         reportsContainer.innerHTML = `
@@ -90,12 +186,30 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      let markersAdded = 0;
       reports.forEach((report) => {
         const card = createReportCard(report);
         reportsContainer.appendChild(card);
+
+        // Add marker to map if location exists
+        if (
+          report.location &&
+          report.location.latitude &&
+          report.location.longitude
+        ) {
+          addMarker(report);
+          markersAdded++;
+        }
       });
+
+      console.log(
+        `🗺️ Added ${markersAdded} markers to map out of ${reports.length} reports`,
+      );
+
+      // Fit map to show all markers
+      fitMapToMarkers();
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error fetching reports:", err);
       reportsContainer.innerHTML =
         '<p class="text-red-600 col-span-full text-center">Failed to load reports.</p>';
     }
@@ -207,11 +321,13 @@ document.addEventListener("DOMContentLoaded", () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(body),
-        }
+        },
       );
 
       const data = await response.json();
       if (data.success || response.ok) {
+        // Remove marker from map
+        removeMarker(id);
         closeModal();
         fetchAssignedReports(); // Refresh list
       } else {
@@ -223,5 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Initialize map on page load
+  initMap();
   fetchAssignedReports();
 });

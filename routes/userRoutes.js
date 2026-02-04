@@ -66,11 +66,15 @@ router.post("/signup", upload.single("license"), async (req, res) => {
           fs.unlinkSync(req.file.path); // Delete local file
         } catch (uploadError) {
           console.error("License upload error:", uploadError);
-          return res.status(500).json({ success: false, message: "Error uploading license" });
+          return res
+            .status(500)
+            .json({ success: false, message: "Error uploading license" });
         }
       } else {
         // Assume license is mandatory for drivers
-         return res.status(400).json({ success: false, message: "Driver license is required" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Driver license is required" });
       }
     }
 
@@ -92,7 +96,10 @@ router.post("/signup", upload.single("license"), async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: role === 'driver' ? "Driver registered successfully. Please wait for admin verification." : "User registered successfully",
+      message:
+        role === "driver"
+          ? "Driver registered successfully. Please wait for admin verification."
+          : "User registered successfully",
       // user: newUser
       user,
     });
@@ -138,11 +145,12 @@ router.post("/login", async (req, res) => {
     }
 
     // Check if user is a driver and is verified
-    if (user.role === 'driver' && !user.isVerified) {
-        return res.status(403).json({
-            success: false,
-            message: "Account pending verification. Please wait for admin approval.",
-        });
+    if (user.role === "driver" && !user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Account pending verification. Please wait for admin approval.",
+      });
     }
 
     const token = jwt.sign(
@@ -152,7 +160,7 @@ router.post("/login", async (req, res) => {
         role: user.role,
       },
       process.env.JWT_SECRET || "my-secret-token",
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     const userResponse = user.toObject();
@@ -178,7 +186,7 @@ router.post(
     try {
       console.log(
         "Report route hit. Content-Type:",
-        req.headers["content-type"]
+        req.headers["content-type"],
       );
       console.log("Request body:", req.body);
       const { category, address, description } = req.body;
@@ -220,6 +228,27 @@ router.post(
         }
       }
 
+      // Geocode the address to get coordinates
+      let locationData = null;
+      try {
+        const { geocodeAddress } = await import("../utils/geocoder.js");
+        const coords = await geocodeAddress(address);
+        if (coords) {
+          locationData = {
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          };
+          console.log(`📍 Location set from address: ${address}`, locationData);
+        } else {
+          console.warn(
+            `⚠️ Could not geocode address: ${address}. Report will be saved without location.`,
+          );
+        }
+      } catch (geocodeError) {
+        console.error("Geocoding error:", geocodeError.message);
+        // Continue without location data if geocoding fails
+      }
+
       // Admin-only fields
       let adminFields = {};
       if (req.user.role === "admin") {
@@ -238,6 +267,7 @@ router.post(
         photos: photoUrls, // save array of image URLs
         status: "Pending",
         user: req.user.id,
+        location: locationData,
         ...adminFields,
       });
 
@@ -250,7 +280,7 @@ router.post(
       console.log(error);
       res.status(500).json({ success: false, message: "Server error" });
     }
-  }
+  },
 );
 
 router.get("/dashboard", authenticate, async (req, res) => {
@@ -261,31 +291,35 @@ router.get("/dashboard", authenticate, async (req, res) => {
 
     // 2. Finds all reports in MongoDB where the 'user' field matches this ID.
     // .sort({ createdAt: -1 }) puts the newest reports at the top of the list.
-    
+
     // Safety check: Ensure userId is valid
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-       console.error("Dashboard Error: Invalid User ID:", userId);
-       return res.status(400).json({ success: false, message: "Invalid User ID" });
+      console.error("Dashboard Error: Invalid User ID:", userId);
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid User ID" });
     }
 
-    const reports = await Report.find({ user: new mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 });
+    const reports = await Report.find({
+      user: new mongoose.Types.ObjectId(userId),
+    }).sort({ createdAt: -1 });
 
     // 3. Calculates 'Total Reports' by getting the length of the reports array.
     const totalReports = reports.length;
 
     // 4. Uses .filter() to count how many reports have the status "Completed".
     const resolvedIncidents = reports.filter(
-      (r) => r.status === "Completed" || r.status === "Resolved"
+      (r) => r.status === "Completed" || r.status === "Resolved",
     ).length;
 
     // 5. Counts reports that are still "Pending" or "In Progress".
     const inProgress = reports.filter(
-      (r) => r.status === "Pending" || r.status === "In Progress"
+      (r) => r.status === "Pending" || r.status === "In Progress",
     ).length;
 
     // 6. Sends all the stats and the full list of reports back to the frontend.
-    res.set('Cache-Control', 'no-store'); // Prevent caching
-    
+    res.set("Cache-Control", "no-store"); // Prevent caching
+
     res.status(200).json({
       success: true,
       stats: { totalReports, resolvedIncidents, inProgress },

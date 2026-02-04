@@ -1,5 +1,9 @@
 import express from "express";
-import { authenticate, authenticateDriver, authenticateAdmin } from "../middleware/auth.js";
+import {
+  authenticate,
+  authenticateDriver,
+  authenticateAdmin,
+} from "../middleware/auth.js";
 import Report from "../models/report.js";
 import User from "../models/User.js";
 
@@ -11,7 +15,11 @@ const router = express.Router();
 // GET /api/driver/assigned - Get reports assigned to the logged-in driver
 router.get("/assigned", authenticate, authenticateDriver, async (req, res) => {
   try {
-    const reports = await Report.find({ assignedDriver: req.user.id })
+    // Only fetch reports with Pending or In Progress status
+    const reports = await Report.find({
+      assignedDriver: req.user.id,
+      status: { $in: ["Pending", "In Progress"] },
+    })
       .populate("user", "fullname email") // Get details of the reporter
       .sort({ createdAt: -1 });
     res.json(reports);
@@ -68,7 +76,7 @@ router.patch(
       console.error("Error updating report status:", error);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
 
 export default router;

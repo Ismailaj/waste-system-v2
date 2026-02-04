@@ -27,10 +27,18 @@ const reportSchema = new mongoose.Schema(
       enum: ["Low", "Medium", "High", "Critical"],
       default: "Medium",
     },
+    location: {
+      type: {
+        latitude: { type: Number, required: false },
+        longitude: { type: Number, required: false },
+      },
+      required: false,
+      default: null,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Report = mongoose.model("Report", reportSchema);
